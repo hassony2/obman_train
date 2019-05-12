@@ -1,0 +1,16 @@
+misc/
+thirdparty/
+figures/
+data/
+checkpoints/
+checkpoints2
+tmp/
+debug/
+
+__pycache__/
+.pytest_cache/
+
+*.sw*
+notebooks
+*.lprof
+
