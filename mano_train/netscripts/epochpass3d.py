@@ -39,10 +39,12 @@ def epoch_pass(loader,
     idxs = list(range(21))  # Joints to use for evaluation
     evaluator = EvalUtil()
 
-    _, faces_right = load_obj('misc/mano/mano_right.obj')
-    _, faces_left = load_obj('misc/mano/mano_left.obj')
-    mano_faces = np.concatenate([faces_right, faces_left], axis=0)
-    mano_faces = torch.Tensor(mano_faces).unsqueeze(0).cuda()
+    with open('misc/mano/MANO_RIGHT.pkl', 'rb') as p_f:
+        mano_right_data = pickle.load(p_f, encoding='latin1')
+        faces_right = mano_right_data['f']
+    with open('misc/mano/MANO_LEFT.pkl', 'rb') as p_f:
+        mano_left_data = pickle.load(p_f, encoding='latin1')
+        faces_left = mano_left_data['f']
 
     # Switch to correct model mode
     if train:

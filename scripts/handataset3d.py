@@ -42,7 +42,6 @@ def main(args):
         atlas_residual=args.atlas_residual,
         atlas_separate_encoder=args.atlas_separate_encoder,
         atlas_loss=args.atlas_loss,
-        atlas_emd_regul=args.atlas_emd_regul,
         atlas_lambda=args.atlas_lambda,
         atlas_final_lambda=args.atlas_final_lambda,
         atlas_mesh=args.atlas_mesh,
@@ -65,7 +64,6 @@ def main(args):
         collision_thresh=args.collision_thresh,
         collision_mode=args.collision_mode,
         fc_dropout=args.fc_dropout,
-        inject_hands=args.inject_hands,
         mano_neurons=args.hidden_neurons,
         mano_center_idx=args.center_idx,
         mano_root='misc/mano',
@@ -133,6 +131,7 @@ def main(args):
     print('Using {} GPUs !'.format(torch.cuda.device_count()))
     if args.atlas_resume and args.resume:
         raise NotImplementedError('resume and atlas_resume incompatible for now')
+    start_epoch = 0
     if args.atlas_resume:
         # Load atlas encoder and decoder to atlas-specific encoder-decoder branch
         start_epoch, _ = modelio.load_checkpoint(

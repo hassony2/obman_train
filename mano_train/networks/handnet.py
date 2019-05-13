@@ -18,7 +18,6 @@ class HandNet(nn.Module):
                  absolute_lambda=None,
                  atlas_lambda=None,
                  atlas_loss='chamfer',
-                 atlas_emd_regul=0.1,
                  atlas_final_lambda=None,
                  atlas_mesh=True,
                  atlas_mode='sphere',
@@ -163,7 +162,6 @@ class HandNet(nn.Module):
         self.atlas_scale_weight = atlas_scale_weight
         self.atlas_loss = AtlasLoss(
             atlas_loss=atlas_loss,
-            atlas_emd_regul=atlas_emd_regul,
             lambda_atlas=atlas_lambda,
             final_lambda_atlas=atlas_final_lambda,
             trans_weight=atlas_trans_weight,

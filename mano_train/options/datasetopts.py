@@ -9,6 +9,7 @@ def add_dataset_opts(parser):
             'tzionas', 'synthcube'
         ].extend(['synthands_{}'.format(i) for i in range(100)]),
         nargs='+',
+        default=['obman'],
         help='training dataset to load [tomasreal|tomasynth|yanasynth|lsm3d]')
     parser.add_argument(
         '--mini_factor', type=float, help='work on subset of datasets')
@@ -60,6 +61,7 @@ def add_dataset_opts(parser):
             'synthands', 'lsm3d', 'zimsynth'
         ].extend(['synthands_{}'.format(i) for i in range(100)]),
         nargs='+',
+        default=['obman'],
         help='validation dataset to load [tomasreal|tomasynth]')
     parser.add_argument(
         '--val_splits',
@@ -77,4 +79,4 @@ def add_dataset_opts(parser):
 
 def add_dataset3d_opts(parser):
     # Data preprocessing
-    parser.add_argument('--center_idx', type=int)
+    parser.add_argument('--center_idx', type=int, default=0)

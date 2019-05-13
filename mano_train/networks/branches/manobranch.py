@@ -10,7 +10,6 @@ import torch.nn.functional as torch_f
 
 from handobjectdatasets.queries import TransQueries, BaseQueries
 
-from mano_train.objectutils.objectio import load_obj
 from manopth.manolayer import ManoLayer
 
 
@@ -100,9 +99,7 @@ class ManoBranch(nn.Module):
             self.right_skeleton_reg = nn.Linear(joint_nb, joint_nb, bias=False)
             self.right_skeleton_reg.weight.data = torch.eye(joint_nb)
 
-        _, faces_right = load_obj(os.path.join(mano_root, 'mano_right.obj'))
-        _, faces_left = load_obj(os.path.join(mano_root, 'mano_left.obj'))
-        self.faces = faces_right
+        self.faces = self.mano_layer_right.th_faces
 
     def forward(self,
                 inp,

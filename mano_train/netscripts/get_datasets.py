@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from torch.utils.data import ConcatDataset, Subset
 
-from handobjectdatasets import (core50, fhbhands, stereohands, synthgrasps,
+from handobjectdatasets import (core50, fhbhands, stereohands, obman,
                                 yanademo)
 from handobjectdatasets.handataset import HandDataset
 from handobjectdatasets.queries import TransQueries, BaseQueries
@@ -26,17 +26,12 @@ def get_dataset(
         ],
         use_cache=True,
         limit_size=None):
-    if ('synthgrasps' in dat_name):
-        dat_name, version = dat_name.split('_')
-    else:
-        version = None
-    if dat_name == 'synthgrasps':
-        pose_dataset = synthgrasps.SynthGrasps(
+    if dat_name == 'obman':
+        pose_dataset = obman.ObMan(
             mini_factor=mini_factor,
             mode=meta['mode'],
             override_scale=meta['override_scale'],
             segment=False,
-            version=version,
             split=split,
             use_cache=use_cache,
             use_external_points=True)

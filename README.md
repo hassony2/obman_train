@@ -29,6 +29,27 @@ obman_train/
 
 - Follow the instructions from [here](https://github.com/hassony2/manopth)
 
+### Download the MANO model files
+
+- Go to [MANO website](http://mano.is.tue.mpg.de/)
+- Create an account by clicking *Sign Up* and provide your information
+- Download Models and Code (the downloaded file should have the format mano_v*_*.zip). Note that all code and data from this download falls under the [MANO license](http://mano.is.tue.mpg.de/license).
+- unzip and copy the content of the *models* folder into the misc/mano folder
+- Your structure should look like this:
+
+```
+obman_render/
+  misc/
+    mano/
+      MANO_LEFT.pkl
+      MANO_RIGHT.pkl
+```
+
+
+# Launch
+
+`python scripts/handataset3d.py --atlas_predict_trans --atlas_predict_scale --use_shape`
+
 # Acknowledgements
 
 ## AtlasNet code
