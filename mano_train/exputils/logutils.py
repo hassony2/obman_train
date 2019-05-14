@@ -3,10 +3,8 @@ from operator import itemgetter
 import os
 import time
 
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
-import numpy as np
 
 
 def create_log_file(log_path, log_name=''):
@@ -86,7 +84,7 @@ def plot_logs(logs, score_name='top1', y_max=1, prefix=None, score_type=None):
     if score_name == 'top1' or score_name == 'top1_action':
         # Set maximum for y axis
         plt.minorticks_on()
-        x1, x2, y1, y2 = plt.axis()
+        x1, x2, _, _ = plt.axis()
         axes = plt.gca()
         axes.yaxis.set_minor_locator(MultipleLocator(0.02))
         plt.axis((x1, x2, 0, y_max))

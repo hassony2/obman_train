@@ -1,17 +1,13 @@
 import os
 import pickle
 import time
-import warnings
 
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 from progress.bar import Bar as Bar
 import torch
 
-from handobjectdatasets.queries import TransQueries, BaseQueries
+from handobjectdatasets.queries import TransQueries
 
-from mano_train.objectutils.objectio import load_obj
 from mano_train.evaluation.evalutils import AverageMeters
 from mano_train.evaluation.zimeval import EvalUtil
 from mano_train.visualize import displaymano
@@ -127,9 +123,10 @@ def epoch_pass(loader,
                 faces_right=faces_right,
                 faces_left=faces_left)
         if save_results:
-            save_batch_path = os.path.join(save_results_folder,
-                                           'batch_{:06d}.pkl'.format(batch_idx))
-            savemano.save_batch_info(save_batch_path, sample=sample, results=results)
+            save_batch_path = os.path.join(
+                save_results_folder, 'batch_{:06d}.pkl'.format(batch_idx))
+            savemano.save_batch_info(
+                save_batch_path, sample=sample, results=results)
 
         if 'joints' in results and TransQueries.joints3d in sample:
             preds = results['joints'].detach().cpu()
@@ -183,10 +180,16 @@ def epoch_pass(loader,
             overlay = None
 
         if np.isnan(auc_all):
-            print('Not saving pck info, normal in case of only 2D info supervision, abnormal otherwise')
+            print(
+                'Not saving pck info, normal in case of only 2D info supervision, abnormal otherwise'
+            )
         else:
             displaymano.save_pck_img(
-                thresholds, pck_curve_all, auc_all, save_pck_file, overlay=overlay)
+                thresholds,
+                pck_curve_all,
+                auc_all,
+                save_pck_file,
+                overlay=overlay)
         save_pck_pkl = os.path.join(pck_folder, 'epoch_{}.pkl'.format(epoch))
         with open(save_pck_pkl, 'wb') as p_f:
             pickle.dump(pck_info, p_f)

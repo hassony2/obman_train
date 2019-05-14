@@ -19,7 +19,6 @@ class HandNet(nn.Module):
                  atlas_loss='chamfer',
                  atlas_final_lambda=None,
                  atlas_mesh=True,
-                 atlas_mode='sphere',
                  atlas_residual=False,
                  atlas_lambda_regul_edges=0,
                  atlas_lambda_laplacian=0,
@@ -56,12 +55,29 @@ class HandNet(nn.Module):
                  mano_lambda_verts=None,
                  mano_lambda_shape=None,
                  mano_lambda_pca=None,
-                 inject_hands=False,
                  adapt_atlas_decoder=False):
         """
         Args:
+            atlas_mesh (bool): Whether to get points on the mesh instead or
+                randomling generating a point cloud. This allows to use
+                regularizations that rely on an underlying triangulation
+            atlas_ico_division: Granularity of the approximately spherical mesh
+                see https://en.wikipedia.org/wiki/Geodesic_polyhedron.
+                if 1, 42 vertices, if 2, 162 vertices, if 3 (default), 642
+                vertices, if 4, 2562 vertices
             mano_root (path): dir containing mano pickle files
             mano_neurons: number of neurons in each layer of base mano decoder
+            mano_use_pca: predict pca parameters directly instead of rotation
+                angles
+            mano_comps (int): number of principal components to use if
+                mano_use_pca
+            mano_lambda_pca: weight to supervise hand pose in PCA space
+            mano_lambda_pose_reg: weight to supervise hand pose in axis-angle
+                space
+            mano_lambda_verts: weight to supervise vertex distances
+            mano_lambda_joints3d: weight to supervise distances
+            adapt_atlas_decoder: add layer between encoder and decoder, usefull
+                when finetuning from separately pretrained encoder and decoder
         """
         super(HandNet, self).__init__()
         if int(resnet_version) == 18:
@@ -79,7 +95,6 @@ class HandNet(nn.Module):
             self.atlas_adapter = torch.nn.Linear(img_feature_size,
                                                  img_feature_size)
         mano_base_neurons = [img_feature_size] + mano_neurons
-        self.inject_hands = inject_hands
         self.contact_target = contact_target
         self.contact_zones = contact_zones
         self.contact_lambda = contact_lambda
@@ -127,12 +142,9 @@ class HandNet(nn.Module):
 
         self.lambda_joints2d = mano_lambda_joints2d
         self.atlas_mesh = atlas_mesh
-        if self.inject_hands:
-            feature_size = img_feature_size + mano_comps + 3
-        else:
-            feature_size = img_feature_size
+        feature_size = img_feature_size
         self.atlas_branch = AtlasBranch(
-            mode=atlas_mode,
+            mode='sphere',
             use_residual=atlas_residual,
             points_nb=atlas_points_nb,
             predict_trans=atlas_predict_trans,
@@ -254,10 +266,6 @@ class HandNet(nn.Module):
                     atlas_features = self.atlas_adapter(features)
                 else:
                     atlas_features = features
-                if self.inject_hands:
-                    mano_pose = mano_results['pose']
-                    atlas_features = torch.cat(
-                        [atlas_features, mano_pose.detach()], 1)
                 if self.atlas_separate_encoder:
                     atlas_results = self.atlas_branch.forward_inference(
                         atlas_features,

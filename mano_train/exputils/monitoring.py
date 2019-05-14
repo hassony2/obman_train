@@ -6,15 +6,15 @@ import plotly.graph_objs as go
 
 from mano_train.exputils import logutils
 
+
 class Monitor():
-    def __init__(self, checkpoint, plotly=True, hosting_folder=None):
+    def __init__(self, checkpoint, hosting_folder=None):
         self.checkpoint = checkpoint
         self.train_path = os.path.join(self.checkpoint, 'train.txt')
         self.val_path = os.path.join(self.checkpoint, 'val.txt')
         logutils.create_log_file(self.train_path)
         logutils.create_log_file(self.val_path)
 
-        self.plotly = plotly
         self.hosting_folder = hosting_folder
         os.makedirs(self.hosting_folder, exist_ok=True)
         self.metrics = Metrics(checkpoint, hosting_folder=self.hosting_folder)

@@ -1,16 +1,11 @@
-import argparse
-import os
-
-from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as torch_f
 
-from handobjectdatasets.queries import TransQueries, BaseQueries
-
 from manopth.manolayer import ManoLayer
+
+from handobjectdatasets.queries import TransQueries, BaseQueries
 
 
 class ManoBranch(nn.Module):
@@ -22,7 +17,6 @@ class ManoBranch(nn.Module):
                  use_trans=False,
                  use_pca=True,
                  mano_root='misc/mano',
-                 refine=False,
                  adapt_skeleton=True,
                  dropout=0):
         """
@@ -35,7 +29,6 @@ class ManoBranch(nn.Module):
         self.use_trans = use_trans
         self.use_shape = use_shape
         self.use_pca = use_pca
-        self.refine = refine
         self.stereo_shape = torch.Tensor([
             -0.00298099, -0.0013994, -0.00840144, 0.00362311, 0.00248761,
             0.00044125, 0.00381337, -0.00183374, -0.00149655, 0.00137479
@@ -51,8 +44,6 @@ class ManoBranch(nn.Module):
         base_layers = []
         for layer_idx, (inp_neurons, out_neurons) in enumerate(
                 zip(base_neurons[:-1], base_neurons[1:])):
-            if layer_idx == 0 and self.refine:
-                inp_neurons = inp_neurons + mano_pose_size
             if dropout:
                 base_layers.append(nn.Dropout(p=dropout))
             base_layers.append(nn.Linear(inp_neurons, out_neurons))
@@ -108,8 +99,6 @@ class ManoBranch(nn.Module):
                 shape=None,
                 pose=None,
                 use_stereoshape=False):
-        if self.refine and pose is not None:
-            inp = torch.cat((inp, pose), 1)
         base_features = self.base_layer(inp)
         pose = self.pose_reg(base_features)
         if not self.use_pca:

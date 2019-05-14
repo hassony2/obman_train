@@ -48,7 +48,7 @@ obman_render/
 
 # Launch
 
-`python traineval.py --atlas_predict_trans --atlas_predict_scale --use_shape`
+`python traineval.py --atlas_predict_trans --atlas_predict_scale --atlas_mesh --mano_use_shape --mano_use_pca --freeze_batchnorm --atlas_separate_encoder`
 
 # Acknowledgements
 
@@ -62,4 +62,6 @@ Thanks [Thibault](https://github.com/ThibaultGROUEIX/) for the provided code !
 Code for computing hand evaluation metrics was reused from [hand3d](https://github.com/lmb-freiburg/hand3d), courtesy of [Christian Zimmermann](https://lmb.informatik.uni-freiburg.de/people/zimmermc/) with an easy-to-use interface!
 
 
+## Laplacian regularization loss
 
+[Code](https://github.com/akanazawa/cmr) for the laplacian regularization and precious advice was provided by [Angjoo Kanazawa's](https://people.eecs.berkeley.edu/~kanazawa/) !

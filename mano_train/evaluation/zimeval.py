@@ -117,8 +117,8 @@ class EvalUtil:
         epe_mean_all = np.mean(np.array(epe_mean_all))
         epe_median_all = np.mean(np.array(epe_median_all))
         auc_all = np.mean(np.array(auc_all))
-        pck_curve_joints = pck_curve_all
         pck_curve_all = np.mean(np.array(pck_curve_all),
                                 0)  # mean only over keypoints
 
-        return epe_mean_all, epe_mean_joint, epe_median_all, auc_all, pck_curve_all, thresholds
+        return (epe_mean_all, epe_mean_joint, epe_median_all, auc_all,
+                pck_curve_all, thresholds)
