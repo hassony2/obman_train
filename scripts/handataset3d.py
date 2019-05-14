@@ -69,7 +69,6 @@ def main(args):
         mano_root='misc/mano',
         mano_comps=args.mano_comps,
         mano_use_pca=args.mano_use_pca,
-        mano_use_pose_prior=args.mano_use_pose_prior,
         mano_use_shape=args.use_shape,
         mano_lambda_joints3d=args.mano_lambda_joints3d,
         mano_lambda_pose_reg=args.mano_lambda_pose_reg,

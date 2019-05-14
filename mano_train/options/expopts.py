@@ -27,7 +27,7 @@ def add_exp_opts(parser):
         default=500,
         help='show intermediate results')
     parser.add_argument('--test_display_freq', type=int, default=100)
-    parser.add_argument('--epoch_display_freq', type=int, default=5)
+    parser.add_argument('--epoch_display_freq', type=int, default=2)
     parser.add_argument('--save_results', action='store_true')
     parser.add_argument('--pyapt_id')
     parser.add_argument('--no_simulate', action='store_true')

@@ -9,7 +9,6 @@ from mano_train.networks.branches.manobranch import ManoBranch, ManoLoss
 from mano_train.networks.branches.atlasbranch import AtlasBranch, AtlasLoss
 from mano_train.networks.branches.contactloss import compute_contact_loss, batch_pairwise_dist, meshiou
 from mano_train.networks.branches.absolutebranch import AbsoluteBranch
-from mano_train.networks.branches.poseprior import MaxMixturePrior
 from handobjectdatasets.queries import TransQueries, BaseQueries
 
 
@@ -104,10 +103,6 @@ class HandNet(nn.Module):
                               int(img_feature_size / 2)])
 
         self.mano_adapt_skeleton = mano_adapt_skeleton
-        self.mano_use_pose_prior = mano_use_pose_prior
-        if self.mano_use_pose_prior:
-            assert mano_comps == 30, 'Only 30 components supported with pose prior, got {}'.format(mano_comps)
-            self.pose_prior = MaxMixturePrior(use_body=False, use_left_hand=True)
         self.mano_branch = ManoBranch(
             ncomps=mano_comps,
             base_neurons=mano_base_neurons,
@@ -122,21 +117,12 @@ class HandNet(nn.Module):
             self.mano_lambdas = True
         else:
             self.mano_lambdas = False
-        if self.mano_use_pose_prior:
-            self.mano_loss = ManoLoss(
-                lambda_verts=mano_lambda_verts,
-                lambda_joints3d=mano_lambda_joints3d,
-                lambda_shape=mano_lambda_shape,
-                lambda_pca=mano_lambda_pca)
-            self.mano_lambda_pose_reg = mano_lambda_pose_reg
-            self.mano_lambda_pose_reg = mano_lambda_pose_reg
-        else:
-            self.mano_loss = ManoLoss(
-                lambda_verts=mano_lambda_verts,
-                lambda_joints3d=mano_lambda_joints3d,
-                lambda_shape=mano_lambda_shape,
-                lambda_pose_reg=mano_lambda_pose_reg,
-                lambda_pca=mano_lambda_pca)
+        self.mano_loss = ManoLoss(
+            lambda_verts=mano_lambda_verts,
+            lambda_joints3d=mano_lambda_joints3d,
+            lambda_shape=mano_lambda_shape,
+            lambda_pose_reg=mano_lambda_pose_reg,
+            lambda_pca=mano_lambda_pca)
 
 
         self.lambda_joints2d = mano_lambda_joints2d
@@ -249,10 +235,6 @@ class HandNet(nn.Module):
 
                 for key, val in mano_losses.items():
                     losses[key] = val
-                if self.mano_use_pose_prior:
-                    prior_loss = self.pose_prior(mano_results['pose'][:,3:]).mean()
-                    losses['hand_prior'] = prior_loss
-                    total_loss += self.mano_lambda_pose_reg * prior_loss
 
             for key, result in mano_results.items():
                 results[key] = result
