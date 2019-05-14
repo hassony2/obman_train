@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import os
 import random
 import sys
-sys.path.append(os.getcwd())
 
 import numpy as np
 import torch

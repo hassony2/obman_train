@@ -48,7 +48,7 @@ obman_render/
 
 # Launch
 
-`python scripts/handataset3d.py --atlas_predict_trans --atlas_predict_scale --use_shape`
+`python traineval.py --atlas_predict_trans --atlas_predict_scale --use_shape`
 
 # Acknowledgements
 
