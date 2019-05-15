@@ -1,20 +1,14 @@
 #!/usr/bin/env python
 import argparse
 from collections import OrderedDict
-from copy import deepcopy
 import os
 import pickle
 import sys
-import traceback
-import warnings
 
 import dominate
 from dominate.tags import *
-import matplotlib.pyplot as plt
-import numpy as np
 
-
-from mano_train.exputils import argutils, analyzlogutils
+from mano_train.exputils import argutils
 from mano_train import logutils as manologutils
 
 
@@ -117,7 +111,8 @@ if __name__ == "__main__":
         default='epe_mean',
         help='Metric on which'
         'to choose best epoch')
-    parser.add_argument('--epoch', type=int, help='Epoch at which to show results')
+    parser.add_argument(
+        '--epoch', type=int, help='Epoch at which to show results')
     parser.add_argument(
         '--metric_higher_better',
         action='store_true',
@@ -146,7 +141,7 @@ if __name__ == "__main__":
         train_info, val_info = analyze_experiment(
             checkpoint,
             metrics=metrics,
-            epoch = args.epoch,
+            epoch=args.epoch,
             host_folder=args.host_path,
             no_train=args.no_train,
             show_best_idx=args.show_best_idx)

@@ -1,10 +1,9 @@
 import warnings
 
 import numpy as np
-from torch.utils.data import ConcatDataset, Subset
+from torch.utils.data import Subset
 
-from handobjectdatasets import (core50, fhbhands, stereohands, obman,
-                                yanademo)
+from handobjectdatasets import (core50, fhbhands, stereohands, obman, yanademo)
 from handobjectdatasets.handataset import HandDataset
 from handobjectdatasets.queries import TransQueries, BaseQueries
 

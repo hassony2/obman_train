@@ -48,7 +48,28 @@ obman_render/
 
 # Launch
 
+## Training
+
 `python traineval.py --atlas_predict_trans --atlas_predict_scale --atlas_mesh --mano_use_shape --mano_use_pca --freeze_batchnorm --atlas_separate_encoder`
+
+## Demo
+
+We provide a model trained on the synthetic ObMan dataset.
+
+You can test it on a recorded video or live using a webcam by launching :
+
+`python webcam_demo.py --resume release_models/obman/checkpoint.pth.tar  --pred_obj --hand_side left`
+
+
+### Limitations
+
+- This demo doesn't operate hand detection, so the model expects a roughly centered hand
+- As we are deforming a sphere, the topology of the object is 0, which explains results such as the following:
+
+![mug](readme_assets/images/mug.png)
+
+- the model is trained only on hands holding objects, and therefore doesn't perform well on hands in the absence of objects for poses that do not resemble common grasp poses.
+
 
 # Acknowledgements
 
