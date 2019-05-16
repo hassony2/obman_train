@@ -65,7 +65,11 @@ def forward_pass_3d(model, input_image):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--resume', type=str, help='Path to checkpoint')
+    parser.add_argument(
+        '--resume',
+        type=str,
+        help='Path to checkpoint',
+        default='release_models/obman/checkpoint.pth.tar')
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--hand_side', default='left')
     parser.add_argument('--pred_obj', action='store_true')

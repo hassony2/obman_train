@@ -48,9 +48,7 @@ def get_dataset(
         suffix = dat_name.split('_')[-1]
         if suffix == 'obj':
             pose_dataset = fhbhands.FHBHands(
-                filter_object=meta['fhbhands_filter_object'],
                 mini_factor=mini_factor,
-                override_scale=meta['override_scale'],
                 split=split,
                 use_cache=use_cache,
                 use_objects=True,

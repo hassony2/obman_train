@@ -25,7 +25,7 @@ class FHBHands():
     def __init__(
             self,
             split='train',
-            split_type='objects',
+            split_type='subjects',
             original_subject_split=True,
             joint_nb=21,
             use_cache=False,
