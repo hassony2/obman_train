@@ -18,6 +18,7 @@ from mano_train.netscripts.reload import reload_model
 from mano_train.modelutils import modelio
 from mano_train.objectutils import objectio
 from mano_train.visualize import displaymano
+from mano_train.demo.attention import AttentionHook
 
 
 def preprocess_frame(frame):
@@ -60,6 +61,7 @@ def forward_pass_3d(model, input_image):
         sample[TransQueries.objpoints3d] = input_image.new_ones((1, 600,
                                                                  3)).float()
     _, results, _ = model.forward(sample, no_loss=True)
+
     return results
 
 
@@ -90,7 +92,6 @@ if __name__ == '__main__':
     # Initialize network
     model = reload_model(args.resume, opts, no_beta=args.no_beta)
 
-    model = torch.nn.DataParallel(model)
     model.eval()
 
     # Initialize stream from camera
@@ -110,6 +111,10 @@ if __name__ == '__main__':
         mano_right_data = pickle.load(p_f, encoding='latin1')
         faces = mano_right_data['f']
 
+    # Add attention map
+    attention_hand = AttentionHook(model.module.base_net)
+    attention_atlas = AttentionHook(model.module.atlas_base_net)
+
     fig = plt.figure(figsize=(4, 4))
     while (True):
         fig.clf()
@@ -118,7 +123,10 @@ if __name__ == '__main__':
             raise RuntimeError('OpenCV could not load frame')
         frame = preprocess_frame(frame)
         input_image = prepare_input(frame)
-
+        blend_img_hand = attention_hand.blend_map(frame)
+        cv2.imshow('attention hand', blend_img_hand)
+        blend_img_atlas = attention_atlas.blend_map(frame)
+        cv2.imshow('attention atlas', blend_img_atlas)
         img = Image.fromarray(frame.copy())
         hand_crop = cv2.resize(np.array(img), (256, 256))
         hand_image = prepare_input(
