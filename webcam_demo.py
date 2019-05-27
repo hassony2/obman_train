@@ -1,63 +1,27 @@
 import argparse
 import os
 import pickle
-import sys
 
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
-from torchvision.transforms import functional as func_transforms
 from PIL import Image
-import torch
 
 import argutils
 from handobjectdatasets.queries import TransQueries, BaseQueries
 
-from mano_train.networks.handnet import HandNet
 from mano_train.netscripts.reload import reload_model
-from mano_train.modelutils import modelio
-from mano_train.objectutils import objectio
 from mano_train.visualize import displaymano
 from mano_train.demo.attention import AttentionHook
+from mano_train.demo.preprocess import prepare_input, preprocess_frame
 
-
-def preprocess_frame(frame):
-    # Squarify
-    frame = frame[:,
-                  int(frame.shape[1] / 2 - frame.shape[0] / 2):int(
-                      frame.shape[1] / 2 + frame.shape[0] / 2)]
-    frame = cv2.resize(frame, (256, 256))
-    return frame
-
-
-def prepare_input(frame, flip_left_right=False):
-    # BGR to RGB and flip frame
-    input_image = np.flip(frame, axis=2).copy()
-    if flip_left_right:
-        input_image = np.flip(input_image, axis=1).copy()
-
-    # Concert to shape batch_size=1, rgb, h, w
-    input_image = torch.Tensor(input_image.transpose(2, 0, 1))
-
-    # To debug what is actually fed to network
-    if args.debug:
-        plt.imshow(input_image.numpy().transpose(1, 2, 0) / 255)
-        plt.show()
-    input_image = func_transforms.normalize(input_image / 255, [0.5, 0.5, 0.5],
-                                            [1, 1, 1]).unsqueeze(0)
-    # Equivalently
-    # input_image_1 = input_image / 255 - 0.5
-    input_image = input_image.cuda()
-    return input_image
-
-
-def forward_pass_3d(model, input_image):
+def forward_pass_3d(model, input_image, pred_obj=True):
     sample = {}
     sample[TransQueries.images] = input_image
     sample[BaseQueries.sides] = [args.hand_side]
     sample[TransQueries.joints3d] = input_image.new_ones((1, 21, 3)).float()
     sample['root'] = 'wrist'
-    if args.pred_obj:
+    if pred_obj:
         sample[TransQueries.objpoints3d] = input_image.new_ones((1, 600,
                                                                  3)).float()
     _, results, _ = model.forward(sample, no_loss=True)
@@ -113,7 +77,11 @@ if __name__ == '__main__':
 
     # Add attention map
     attention_hand = AttentionHook(model.module.base_net)
-    attention_atlas = AttentionHook(model.module.atlas_base_net)
+    if hasattr(model.module, 'atlas_base_net'):
+        attention_atlas = AttentionHook(model.module.atlas_base_net)
+        has_atlas_encoder = True
+    else:
+        has_atlas_encoder = False
 
     fig = plt.figure(figsize=(4, 4))
     while (True):
@@ -125,8 +93,9 @@ if __name__ == '__main__':
         input_image = prepare_input(frame)
         blend_img_hand = attention_hand.blend_map(frame)
         cv2.imshow('attention hand', blend_img_hand)
-        blend_img_atlas = attention_atlas.blend_map(frame)
-        cv2.imshow('attention atlas', blend_img_atlas)
+        if has_atlas_encoder:
+            blend_img_atlas = attention_atlas.blend_map(frame)
+            cv2.imshow('attention atlas', blend_img_atlas)
         img = Image.fromarray(frame.copy())
         hand_crop = cv2.resize(np.array(img), (256, 256))
         hand_image = prepare_input(

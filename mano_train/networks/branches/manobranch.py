@@ -150,13 +150,13 @@ class ManoBranch(nn.Module):
                 pose_right,
                 th_betas=shape_right,
                 th_trans=trans_right,
-                root_palm=torch.Tensor([0]))
+                root_palm=root_palm)
         if pose_left.shape[0] > 0:
             verts_left, joints_left = self.mano_layer_left(
                 pose_left,
                 th_betas=shape_left,
                 th_trans=trans_left,
-                root_palm=torch.Tensor([0]))
+                root_palm=root_palm)
         if self.adapt_skeleton:
             if len(joints_left) != 0:
                 joints_left = self.left_skeleton_reg(
