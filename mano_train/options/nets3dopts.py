@@ -201,10 +201,10 @@ def add_train3d_opts(parser):
     parser.add_argument(
         '--epochs', default=30, type=int, help='number of total epochs to run')
     parser.add_argument(
-        '--train_batch', default=6, type=int, help='Train batch size')
+        '--train_batch', default=32, type=int, help='Train batch size')
     parser.add_argument(
         '--test_batch',
-        default=6,
+        default=32,
         type=int,
         metavar='N',
         help='Test batch size')

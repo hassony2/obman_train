@@ -85,4 +85,4 @@ Code for computing hand evaluation metrics was reused from [hand3d](https://gith
 
 ## Laplacian regularization loss
 
-[Code](https://github.com/akanazawa/cmr) for the laplacian regularization and precious advice was provided by [Angjoo Kanazawa's](https://people.eecs.berkeley.edu/~kanazawa/) !
+[Code](https://github.com/akanazawa/cmr) for the laplacian regularization and precious advice was provided by [Angjoo Kanazawa](https://people.eecs.berkeley.edu/~kanazawa/) !
