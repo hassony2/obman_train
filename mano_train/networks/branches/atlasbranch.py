@@ -11,7 +11,7 @@ import trimesh
 
 from handobjectdatasets.queries import TransQueries, BaseQueries
 
-from mano_train.networks.branches import atlasutils, emdutils
+from mano_train.networks.branches import atlasutils
 from mano_train.networks.branches.laplacianloss import LaplacianLoss
 
 
@@ -167,7 +167,6 @@ class AtlasLoss():
     def __init__(self,
                  lambda_atlas=1,
                  atlas_loss='chamfer',
-                 atlas_emd_regul=0.1,
                  final_lambda_atlas=1,
                  trans_weight=0,
                  scale_weight=0,
@@ -185,11 +184,10 @@ class AtlasLoss():
             self.laplacian_loss = LaplacianLoss(laplacian_faces,
                                                 laplacian_verts)
         self.atlas_loss = atlas_loss
-        self.atlas_emd_regul = atlas_emd_regul
         if self.atlas_loss == 'chamfer':
             self.chamfer_loss = atlasutils.ChamferLoss()
         else:
-            self.emd_loss = emdutils.EMDLoss(eps=atlas_emd_regul)
+            raise ValueError('Removed support for earth mover distance !')
 
     def compute_loss(self, preds, target):
         atlas_losses = {}
@@ -221,10 +219,6 @@ class AtlasLoss():
                     loss_1, loss_2 = self.chamfer_loss(
                         preds['objpointscentered3d'], centered_objpoints3d)
                     sym_loss = torch.mean(loss_1 + loss_2)
-                elif self.atlas_loss == 'emd':
-                    emd_loss, chamfer_loss = self.emd_loss(preds['objpointscentered3d'],
-                                             centered_objpoints3d)
-                    sym_loss = torch.mean(emd_loss)
                     atlas_losses['atlas_chamfer'] = chamfer_loss
                 obj_mesh = preds['objpointscentered3d']
 
@@ -233,11 +227,6 @@ class AtlasLoss():
                     final_loss_1, final_loss_2 = self.chamfer_loss(
                         preds['objpoints3d'], target[TransQueries.objpoints3d])
                     sym_final_loss = torch.mean(final_loss_1 + final_loss_2)
-                elif self.atlas_loss == 'emd':
-                    emd_loss, chamfer_loss = self.emd_loss(preds['objpoints3d'],
-                                             target[TransQueries.objpoints3d])
-                    atlas_losses['atlas_chamfer'] = chamfer_loss
-                    sym_final_loss = torch.mean(emd_loss)
                 atlas_losses['final_{}_loss'.format(
                     self.atlas_loss)] = sym_final_loss
                 final_loss = (self.lambda_atlas * sym_loss +
@@ -254,12 +243,6 @@ class AtlasLoss():
                             preds['objpoints3d'],
                             target[TransQueries.objpoints3d])
                         sym_loss = torch.mean((loss_1 + loss_2))
-                    elif self.atlas_loss == 'emd':
-                        emd_loss, chamfer_loss = self.emd_loss(
-                            preds['objpoints3d'],
-                            target[TransQueries.objpoints3d])
-                        atlas_losses['atlas_chamfer'] = chamfer_loss
-                        sym_loss = torch.mean(emd_loss)
                     final_loss = self.lambda_atlas * sym_loss
                     obj_mesh = preds['objpoints3d']
             # Regularization losses

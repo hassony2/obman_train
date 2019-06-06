@@ -1,5 +1,17 @@
+import pickle
+from functools import lru_cache
+
 import numpy as np
 import torch
+
+
+@lru_cache(maxsize=128)
+def load_contacts(save_contact_paths='assets/contact_zones.pkl',
+                  display=False):
+    with open(save_contact_paths, 'rb') as p_f:
+        contact_data = pickle.load(p_f)
+    hand_verts = contact_data['verts']
+    return hand_verts, contact_data['contact_zones']
 
 
 def ray_triangle_intersection(ray_near, ray_dir, v123):
@@ -48,20 +60,21 @@ def ray_triangle_intersection(ray_near, ray_dir, v123):
 
 
 # Full batch mode
-def batch_mesh_contains_points(ray_origins,
-                               obj_triangles,
-                               direction=torch.Tensor([0.4395064455, 0.617598629942,
-                               0.652231566745]).cuda()):
+def batch_mesh_contains_points(
+        ray_origins,
+        obj_triangles,
+        direction=torch.Tensor([0.4395064455, 0.617598629942,
+                                0.652231566745]).cuda()):
     """Times efficient but memory greedy !
     Computes ALL ray/triangle intersections and then counts them to determine
     if point inside mesh
 
     Args:
-        ray_origins: (batch_size x point_nb x 3)
-        obj_triangles: (batch_size, triangle_nb, vertex_nb=3, vertex_coords=3)
-        tol_thresh: To determine if ray and triangle are //
+    ray_origins: (batch_size x point_nb x 3)
+    obj_triangles: (batch_size, triangle_nb, vertex_nb=3, vertex_coords=3)
+    tol_thresh: To determine if ray and triangle are //
     Returns:
-        exterior: (batch_size, point_nb) 1 if the point is outside mesh, 0 else
+    exterior: (batch_size, point_nb) 1 if the point is outside mesh, 0 else
     """
     tol_thresh = 0.0000001
     # ray_origins.requires_grad = False
@@ -99,9 +112,9 @@ def batch_mesh_contains_points(ray_origins,
     v0 = v0.repeat(1, point_nb, 1)
     v0v1 = v0v1.repeat(1, point_nb, 1)
     v0v2 = v0v2.repeat(1, point_nb, 1)
-    hand_verts_repeated = ray_origins.view(
-        batch_size, point_nb, 1, 3).repeat(1, 1, triangle_nb, 1).view(
-            ray_origins.shape[0], triangle_nb * point_nb, 3)
+    hand_verts_repeated = ray_origins.view(batch_size, point_nb, 1, 3).repeat(
+        1, 1, triangle_nb, 1).view(ray_origins.shape[0],
+                                   triangle_nb * point_nb, 3)
     pvec = pvec.repeat(1, point_nb, 1)
     invdet = invdet.repeat(1, point_nb)
     tvec = hand_verts_repeated - v0
@@ -127,7 +140,7 @@ def batch_mesh_contains_points(ray_origins,
     t_pos = t >= tol_thresh
     parallel = parallel.repeat(1, point_nb)
     # # Check that all intersection conditions are met
-    not_parallel =  (1 - parallel)
+    not_parallel = (1 - parallel)
     final_inter = v_correct * u_correct * not_parallel * t_pos
     # Reshape batch point/vertices intersection matrix
     # final_intersections[batch_idx, point_idx, triangle_idx] == 1 means ray
@@ -142,11 +155,11 @@ def batch_mesh_contains_points(ray_origins,
 def batch_mesh_contains_point(ray_origin, obj_triangles, tol_thresh=0.000001):
     """
     Args:
-        ray_origin: (batch_size x 3)
-        obj_triangles: (batch_size, triangle_nb, vertex_nb=3, vertex_coords=3)
-        tol_thresh: To determine if ray and triangle are //
+    ray_origin: (batch_size x 3)
+    obj_triangles: (batch_size, triangle_nb, vertex_nb=3, vertex_coords=3)
+    tol_thresh: To determine if ray and triangle are //
     Returns:
-        intersections: (batch_size, triangle_nb) 1 if the point intersects, else 0
+    intersections: (batch_size, triangle_nb) 1 if the point intersects, else 0
     """
     # Get vertex positions of mesh triangles
     v0, v1, v2 = obj_triangles[:, :, 0], obj_triangles[:, :,

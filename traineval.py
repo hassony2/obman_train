@@ -20,7 +20,9 @@ from mano_train.netscripts import epochpass3d, simulate
 from mano_train.options import datasetopts, nets3dopts, expopts
 
 from handobjectdatasets.queries import BaseQueries, TransQueries
-plt.switch_backend('agg')
+
+plt.switch_backend("agg")
+
 
 def main(args):
     best_score = None
@@ -62,7 +64,7 @@ def main(args):
         collision_mode=args.collision_mode,
         mano_neurons=args.hidden_neurons,
         mano_center_idx=args.center_idx,
-        mano_root='misc/mano',
+        mano_root="misc/mano",
         mano_comps=args.mano_comps,
         mano_use_pca=args.mano_use_pca,
         mano_use_shape=args.mano_use_shape,
@@ -71,7 +73,8 @@ def main(args):
         mano_lambda_joints2d=args.mano_lambda_joints2d,
         mano_lambda_shape=args.mano_lambda_shape,
         mano_lambda_pca=args.mano_lambda_pca,
-        mano_lambda_verts=args.mano_lambda_verts)
+        mano_lambda_verts=args.mano_lambda_verts,
+    )
     max_queries = [
         TransQueries.affinetrans,
         TransQueries.images,
@@ -80,7 +83,7 @@ def main(args):
         TransQueries.joints3d,
         TransQueries.objpoints3d,
         TransQueries.camintrs,
-        BaseQueries.sides
+        BaseQueries.sides,
     ]
     if args.mano_lambda_joints2d:
         max_queries.append(TransQueries.joints2d)
@@ -90,13 +93,13 @@ def main(args):
         netutils.freeze_batchnorm_stats(model)
     if args.freeze_encoder:
         netutils.rec_freeze(model.base_net)
-        print('Froze encoder')
+        print("Froze encoder")
     if args.atlas_separate_encoder and args.atlas_freeze_encoder:
         netutils.rec_freeze(model.atlas_base_net)
-        print('Froze atlas encoder')
-    if args.atlas_freeze_decoder and hasattr(model, 'atlas_branch'):
+        print("Froze atlas encoder")
+    if args.atlas_freeze_decoder and hasattr(model, "atlas_branch"):
         netutils.rec_freeze(model.atlas_branch.decoder)
-        print('Froze atlas decoder')
+        print("Froze atlas decoder")
 
     # Optimize unfrozen parts of the network
     model_params = filter(lambda p: p.requires_grad, model.parameters())
@@ -104,63 +107,77 @@ def main(args):
         name for name, val in model.named_parameters() if val.requires_grad
     ]
     if args.debug:
-        print('=== Optimized params  === ')
+        print("=== Optimized params  === ")
         print(model_param_names)
 
     # Initialize optimizer
-    if args.optimizer == 'adam':
+    if args.optimizer == "adam":
         optimizer = torch.optim.Adam(
-            model_params, lr=args.lr, weight_decay=args.weight_decay)
-    elif args.optimizer == 'rms':
+            model_params, lr=args.lr, weight_decay=args.weight_decay
+        )
+    elif args.optimizer == "rms":
         optimizer = torch.optim.RMSprop(
-            model_params, lr=args.lr, weight_decay=args.weight_decay)
-    elif args.optimizer == 'sgd':
+            model_params, lr=args.lr, weight_decay=args.weight_decay
+        )
+    elif args.optimizer == "sgd":
         optimizer = torch.optim.SGD(
             model_params,
             lr=args.lr,
             momentum=args.momentum,
-            weight_decay=args.weight_decay)
+            weight_decay=args.weight_decay,
+        )
 
     # Optionally resume from a checkpoint
     model = torch.nn.DataParallel(model)
-    print('Using {} GPUs !'.format(torch.cuda.device_count()))
+    print("Using {} GPUs !".format(torch.cuda.device_count()))
     if args.atlas_resume and args.resume:
-        raise NotImplementedError('resume and atlas_resume incompatible for now')
+        raise NotImplementedError("resume and atlas_resume incompatible for now")
     start_epoch = 0
     if args.atlas_resume:
         # Load atlas encoder and decoder to atlas-specific encoder-decoder branch
         start_epoch, _ = modelio.load_checkpoint(
-            model, resume_path=args.atlas_resume, strict=False, load_atlas=True)
-        print('Loaded ATLAS checkpoint from epoch {}, starting from there'.format(
-            start_epoch))
+            model, resume_path=args.atlas_resume, strict=False, load_atlas=True
+        )
+        print(
+            "Loaded ATLAS checkpoint from epoch {}, starting from there".format(
+                start_epoch
+            )
+        )
         if args.evaluate:
             args.epochs = start_epoch + 1
     if args.resume is not None:
         # Load full model weights
         if len(args.resume) == 1:
             start_epoch, _ = modelio.load_checkpoint(
-                model, resume_path=args.resume[0], optimizer=optimizer, strict=False)
-            print('Loaded checkpoint from epoch {}, starting from there'.format(
-                start_epoch))
+                model, resume_path=args.resume[0], optimizer=optimizer, strict=False
+            )
+            print(
+                "Loaded checkpoint from epoch {}, starting from there".format(
+                    start_epoch
+                )
+            )
         else:
             if not args.evaluate:
-                raise ValueError('Multiple checkpoint resume only works in evaluate mode')
+                raise ValueError(
+                    "Multiple checkpoint resume only works in evaluate mode"
+                )
             start_epoch, _ = modelio.load_checkpoints(model, args.resume, strict=False)
         if args.evaluate:
             args.epochs = start_epoch + 1
     model.cuda()
     # Override loaded learning rate
     for group in optimizer.param_groups:
-        group['lr'] = args.lr
-        group['initial_lr'] = args.lr
+        group["lr"] = args.lr
+        group["initial_lr"] = args.lr
 
     if args.lr_decay_gamma:
         scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, args.lr_decay_step, gamma=args.lr_decay_gamma)
+            optimizer, args.lr_decay_step, gamma=args.lr_decay_gamma
+        )
 
     if args.debug:
         num_params = sum(p.numel() for p in model.parameters()) / 1000000.0
-        print('Total params: {} Million'.format(num_params))
+        print("Total params: {} Million".format(num_params))
 
     if not args.evaluate:
         # Initialize train datasets
@@ -173,16 +190,15 @@ def main(args):
             limit_size = None
 
         # Initialize train datasets
-        for train_split, dat_name in zip(args.train_splits,
-                                         args.train_datasets):
+        for train_split, dat_name in zip(args.train_splits, args.train_datasets):
             train_dat = get_dataset(
                 dat_name,
                 meta={
-                    'mode': args.mode,
-                    'override_scale': args.override_scale,
-                    'fhbhands_split_type': args.fhbhands_split_type,
-                    'fhbhands_split_choice': args.fhbhands_split_choice,
-                    'fhbhands_topology': args.fhbhands_topology,
+                    "mode": args.mode,
+                    "override_scale": args.override_scale,
+                    "fhbhands_split_type": args.fhbhands_split_type,
+                    "fhbhands_split_choice": args.fhbhands_split_choice,
+                    "fhbhands_topology": args.fhbhands_topology,
                 },
                 split=train_split,
                 sides=args.sides,
@@ -191,8 +207,9 @@ def main(args):
                 mini_factor=args.mini_factor,
                 point_nb=args.atlas_points_nb,
                 center_idx=args.center_idx,
-                limit_size=limit_size)
-            print('Final dataset size: {}'.format(len(train_dat)))
+                limit_size=limit_size,
+            )
+            print("Final dataset size: {}".format(len(train_dat)))
 
             # Initialize train dataloader
             train_loader = torch.utils.data.DataLoader(
@@ -201,7 +218,8 @@ def main(args):
                 shuffle=True,
                 num_workers=int(args.workers / len(args.train_splits)),
                 pin_memory=True,
-                drop_last=True)
+                drop_last=True,
+            )
             train_loaders.append(train_loader)
         train_loader = ConcatDataloader(train_loaders)
 
@@ -214,18 +232,19 @@ def main(args):
             dat_name,
             max_queries=max_queries,
             meta={
-                'mode': args.mode,
-                'fhbhands_split_type': args.fhbhands_split_type,
-                'fhbhands_split_choice': args.fhbhands_split_choice,
-                'fhbhands_topology': args.fhbhands_topology,
-                'override_scale': args.override_scale,
+                "mode": args.mode,
+                "fhbhands_split_type": args.fhbhands_split_type,
+                "fhbhands_split_choice": args.fhbhands_split_choice,
+                "fhbhands_topology": args.fhbhands_topology,
+                "override_scale": args.override_scale,
             },
             sides=args.sides,
             split=val_split,
             train_it=False,
             mini_factor=args.mini_factor,
             point_nb=args.atlas_points_nb,
-            center_idx=args.center_idx)
+            center_idx=args.center_idx,
+        )
 
         # Initialize val dataloader
         if args.evaluate:
@@ -238,7 +257,8 @@ def main(args):
             shuffle=False,
             num_workers=int(args.workers / len(args.val_datasets)),
             pin_memory=True,
-            drop_last=drop_last)
+            drop_last=drop_last,
+        )
         val_loaders.append(val_loader)
     val_loader = ConcatDataloader(val_loaders)
 
@@ -246,9 +266,7 @@ def main(args):
     val_idxs = None
     train_idxs = None
 
-    hosting_folder = os.path.join(
-        args.host_folder,
-        args.exp_id)
+    hosting_folder = os.path.join(args.host_folder, args.exp_id)
     monitor = Monitor(args.exp_id, hosting_folder=hosting_folder)
     fig = plt.figure(figsize=(12, 12))
 
@@ -256,7 +274,7 @@ def main(args):
         display = epoch % args.epoch_display_freq == 0
         # train for one epoch if not evaluating
         if not args.evaluate:
-            print('Using lr {}'.format(optimizer.param_groups[0]['lr']))
+            print("Using lr {}".format(optimizer.param_groups[0]["lr"]))
             train_avg_meters, train_pck_infos = epochpass3d.epoch_pass(
                 loader=train_loader,
                 model=model,
@@ -269,19 +287,19 @@ def main(args):
                 save_path=args.exp_id,
                 idxs=train_idxs,
                 train=True,
-                fig=fig)
+                fig=fig,
+            )
 
             # Save custom logs
             train_dict = {
                 meter_name: meter.avg
-                for meter_name, meter in
-                train_avg_meters.average_meters.items()
+                for meter_name, meter in train_avg_meters.average_meters.items()
             }
             if train_pck_infos:
                 train_pck_dict = {
-                    'auc': train_pck_infos['auc'],
-                    'epe_mean': train_pck_infos['epe_mean'],
-                    'epe_median': train_pck_infos['epe_median'],
+                    "auc": train_pck_infos["auc"],
+                    "epe_mean": train_pck_infos["epe_mean"],
+                    "epe_median": train_pck_infos["epe_median"],
                 }
             else:
                 train_pck_dict = {}
@@ -302,16 +320,17 @@ def main(args):
                 idxs=val_idxs,
                 train=False,
                 fig=fig,
-                save_results=args.save_results)
+                save_results=args.save_results,
+            )
             val_dict = {
                 meter_name: meter.avg
                 for meter_name, meter in val_avg_meters.average_meters.items()
             }
             if val_pck_infos:
                 val_pck_dict = {
-                    'auc': val_pck_infos['auc'],
-                    'epe_mean': val_pck_infos['epe_mean'],
-                    'epe_median': val_pck_infos['epe_median'],
+                    "auc": val_pck_infos["auc"],
+                    "epe_mean": val_pck_infos["epe_mean"],
+                    "epe_median": val_pck_infos["epe_median"],
                 }
             else:
                 val_pck_dict = {}
@@ -322,51 +341,59 @@ def main(args):
         if args.evaluate:
             if not args.no_simulate:
                 # Get simulation results
-                simulate.full_simul(exp_id=os.path.join(args.exp_id, 'save_results/val/epoch_{}'.format(epoch)), workers=args.workers, cluster=True, use_gui=False)
+                simulate.full_simul(
+                    exp_id=os.path.join(
+                        args.exp_id, "save_results/val/epoch_{}".format(epoch)
+                    ),
+                    workers=args.workers,
+                    cluster=True,
+                    use_gui=False,
+                )
             return
 
         save_dict = {}
         for key in train_full_dict:
             save_dict[key] = {}
             if key in val_full_dict:
-                save_dict[key]['val'] = val_full_dict[key]
-            save_dict[key]['train'] = train_full_dict[key]
+                save_dict[key]["val"] = val_full_dict[key]
+            save_dict[key]["train"] = train_full_dict[key]
 
         monitor.metrics.save_metrics(epoch + 1, save_dict)
         monitor.metrics.plot_metrics()
 
         # remember best acc and save checkpoint
-        if 'auc' in val_pck_infos:
-            best_metric = 'auc'
+        if "auc" in val_pck_infos:
+            best_metric = "auc"
             if best_score is None:
                 best_score = val_full_dict[best_metric]
             is_best = val_full_dict[best_metric] > best_score
             best_score = max(val_full_dict[best_metric], best_score)
         else:
-            best_metric = 'total_loss'
+            best_metric = "total_loss"
             if best_score is None:
                 best_score = val_full_dict[best_metric]
             is_best = val_full_dict[best_metric] < best_score
             best_score = min(val_full_dict[best_metric], best_score)
         modelio.save_checkpoint(
             {
-                'epoch': epoch + 1,
-                'network': args.network,
-                'state_dict': model.state_dict(),
-                'best_score': best_score,
-                'optimizer': optimizer.state_dict(),
+                "epoch": epoch + 1,
+                "network": args.network,
+                "state_dict": model.state_dict(),
+                "best_score": best_score,
+                "optimizer": optimizer.state_dict(),
             },
             is_best=is_best,
             checkpoint=args.exp_id,
-            snapshot=args.snapshot)
+            snapshot=args.snapshot,
+        )
         if args.lr_decay_gamma:
             scheduler.step()
         if epoch % args.regul_decay_step == 0:
             model.module.decay_regul(args.regul_decay_gamma)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Mano training')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Mano training")
     datasetopts.add_dataset_opts(parser)
     datasetopts.add_dataset3d_opts(parser)
     nets3dopts.add_nets3d_opts(parser)
@@ -375,6 +402,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     argutils.print_args(args)
-    argutils.save_args(args, args.exp_id, 'opt')
+    argutils.save_args(args, args.exp_id, "opt")
     main(args)
-    print('All done !')
+    print("All done !")
