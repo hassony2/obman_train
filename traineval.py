@@ -2,7 +2,6 @@ import argparse
 import matplotlib.pyplot as plt
 import os
 import random
-import sys
 
 import numpy as np
 import torch
@@ -131,17 +130,19 @@ def main(args):
     model = torch.nn.DataParallel(model)
     print("Using {} GPUs !".format(torch.cuda.device_count()))
     if args.atlas_resume and args.resume:
-        raise NotImplementedError("resume and atlas_resume incompatible for now")
+        raise NotImplementedError(
+            "resume and atlas_resume incompatible for now"
+        )
     start_epoch = 0
     if args.atlas_resume:
-        # Load atlas encoder and decoder to atlas-specific encoder-decoder branch
+        # Load atlas encoder and decoder to atlas-specific encoder-decoder
+        # branch
         start_epoch, _ = modelio.load_checkpoint(
             model, resume_path=args.atlas_resume, strict=False, load_atlas=True
         )
         print(
-            "Loaded ATLAS checkpoint from epoch {}, starting from there".format(
-                start_epoch
-            )
+            "Loaded ATLAS checkpoint from epoch {},"
+            "starting from there".format(start_epoch)
         )
         if args.evaluate:
             args.epochs = start_epoch + 1
@@ -149,7 +150,10 @@ def main(args):
         # Load full model weights
         if len(args.resume) == 1:
             start_epoch, _ = modelio.load_checkpoint(
-                model, resume_path=args.resume[0], optimizer=optimizer, strict=False
+                model,
+                resume_path=args.resume[0],
+                optimizer=optimizer,
+                strict=False,
             )
             print(
                 "Loaded checkpoint from epoch {}, starting from there".format(
@@ -161,7 +165,9 @@ def main(args):
                 raise ValueError(
                     "Multiple checkpoint resume only works in evaluate mode"
                 )
-            start_epoch, _ = modelio.load_checkpoints(model, args.resume, strict=False)
+            start_epoch, _ = modelio.load_checkpoints(
+                model, args.resume, strict=False
+            )
         if args.evaluate:
             args.epochs = start_epoch + 1
     model.cuda()
@@ -190,7 +196,9 @@ def main(args):
             limit_size = None
 
         # Initialize train datasets
-        for train_split, dat_name in zip(args.train_splits, args.train_datasets):
+        for train_split, dat_name in zip(
+            args.train_splits, args.train_datasets
+        ):
             train_dat = get_dataset(
                 dat_name,
                 meta={
@@ -293,7 +301,10 @@ def main(args):
             # Save custom logs
             train_dict = {
                 meter_name: meter.avg
-                for meter_name, meter in train_avg_meters.average_meters.items()
+                for (
+                    meter_name,
+                    meter,
+                ) in train_avg_meters.average_meters.items()
             }
             if train_pck_infos:
                 train_pck_dict = {
