@@ -24,10 +24,6 @@ class AtlasBranch(nn.Module):
         out_factor=200,
         separate_encoder=False,
     ):
-        """
-        Args:
-            mano_root (path): dir containing mano pickle files
-        """
         super(AtlasBranch, self).__init__()
         self.mode = mode
         self.points_nb = points_nb
@@ -72,10 +68,8 @@ class AtlasBranch(nn.Module):
             # Initialize inference vertices and faces
             test_faces = np.array(test_mesh.faces)
             test_verts = test_mesh.vertices
-        elif mode == "disk":
-            test_verts, test_faces = atlasutils.create_disk(14)
         else:
-            raise ValueError("{} not in [sphere|disk]".format(mode))
+            raise ValueError("{} not in [sphere]".format(mode))
         self.test_verts = torch.Tensor(
             np.array(test_verts).astype(np.float32)
         ).cuda()
