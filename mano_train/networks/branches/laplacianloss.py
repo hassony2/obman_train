@@ -1,9 +1,11 @@
 """
 from https://github.com/akanazawa/cmr by Angjoo Kanazawa !
 
-Computes Lx and it's derivative, where L is the graph laplacian on the mesh with cotangent weights.
+Computes Lx and it's derivative,
+where L is the graph laplacian on the mesh with cotangent weights.
 
-1. Given V, F, computes the cotangent matrix (for each face, computes the angles) in pytorch.
+1. Given V, F, computes the cotangent matrix
+(for each face, computes the angles) in pytorch.
 2. Then it's taken to NP and sparse L is constructed.
 
 Mesh laplacian computation follows Alec Jacobson's gptoolbox.
@@ -14,9 +16,7 @@ from __future__ import division
 from __future__ import print_function
 
 import torch
-from torch.autograd import Variable
 
-from matplotlib import pyplot as plt
 import numpy as np
 from scipy import sparse
 
@@ -117,7 +117,9 @@ class Laplacian(torch.autograd.Function):
             cols = batchF[:, [2, 0, 1]].reshape(-1)
             # Final size is BN x BN
             BN = batchV.shape[0]
-            L = sparse.csr_matrix((batchC.reshape(-1), (rows, cols)), shape=(BN, BN))
+            L = sparse.csr_matrix(
+                (batchC.reshape(-1), (rows, cols)), shape=(BN, BN)
+            )
             L = L + L.T
             # np.sum on sparse is type 'matrix', so convert to np.array
             M = sparse.diags(np.array(np.sum(L, 1)).reshape(-1), format="csr")

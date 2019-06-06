@@ -50,7 +50,6 @@ class HandNet(nn.Module):
         mano_neurons=[512],
         mano_comps=6,
         mano_use_shape=False,
-        mano_use_pose_prior=False,
         mano_lambda_pose_reg=0,
         mano_use_pca=True,
         mano_center_idx=9,
@@ -93,11 +92,15 @@ class HandNet(nn.Module):
             img_feature_size = 2048
             base_net = resnet.resnet50(pretrained=True)
         else:
-            raise NotImplementedError("Resnet {} not supported".format(resnet_version))
+            raise NotImplementedError(
+                "Resnet {} not supported".format(resnet_version)
+            )
         self.adapt_atlas_decoder = adapt_atlas_decoder
         self.atlas_separate_encoder = atlas_separate_encoder
         if self.adapt_atlas_decoder:
-            self.atlas_adapter = torch.nn.Linear(img_feature_size, img_feature_size)
+            self.atlas_adapter = torch.nn.Linear(
+                img_feature_size, img_feature_size
+            )
         mano_base_neurons = [img_feature_size] + mano_neurons
         self.contact_target = contact_target
         self.contact_zones = contact_zones
@@ -187,7 +190,9 @@ class HandNet(nn.Module):
                 gamma * self.atlas_loss.edge_regul_lambda
             )
         if self.atlas_loss.lambda_laplacian is not None:
-            self.atlas_loss.lambda_laplacian = gamma * self.atlas_loss.lambda_laplacian
+            self.atlas_loss.lambda_laplacian = (
+                gamma * self.atlas_loss.lambda_laplacian
+            )
 
     def forward(
         self, sample, no_loss=False, return_features=False, force_objects=False
@@ -225,7 +230,12 @@ class HandNet(nn.Module):
             u_0 = sample[TransQueries.camintrs][:, 0, 2]
             v_0 = sample[TransQueries.camintrs][:, 1, 2]
             absolute_input = torch.cat(
-                (focals.unsqueeze(1), u_0.unsqueeze(1), v_0.unsqueeze(1), features),
+                (
+                    focals.unsqueeze(1),
+                    u_0.unsqueeze(1),
+                    v_0.unsqueeze(1),
+                    features,
+                ),
                 dim=1,
             )
             pred_center3d = self.absolute_branch(absolute_input)
@@ -278,9 +288,10 @@ class HandNet(nn.Module):
             if self.lambda_joints2d and predict_center:
                 non_hom = torch.bmm(
                     sample[TransQueries.camintrs],
-                    (mano_results["joints"] + results["center3d"].unsqueeze(1)).permute(
-                        0, 2, 1
-                    ),
+                    (
+                        mano_results["joints"]
+                        + results["center3d"].unsqueeze(1)
+                    ).permute(0, 2, 1),
                 )
                 proj_joints2d = (non_hom / non_hom[:, 2].unsqueeze(1))[
                     :, :2, :
@@ -288,7 +299,9 @@ class HandNet(nn.Module):
                 results["joints2d"] = proj_joints2d
                 if not no_loss:
                     gt_joints2d = sample[TransQueries.joints2d].cuda().float()
-                    joints2d_loss = torch_f.mse_loss(proj_joints2d, gt_joints2d)
+                    joints2d_loss = torch_f.mse_loss(
+                        proj_joints2d, gt_joints2d
+                    )
                     losses["joints2d"] = joints2d_loss
                     total_loss += self.lambda_joints2d * joints2d_loss
         predict_atlas = TransQueries.objpoints3d in sample.keys() and (
@@ -302,14 +315,22 @@ class HandNet(nn.Module):
                     atlas_features = features
                 if self.atlas_separate_encoder:
                     atlas_results = self.atlas_branch.forward_inference(
-                        atlas_features, separate_encoder_features=atlas_infeatures
+                        atlas_features,
+                        separate_encoder_features=atlas_infeatures,
                     )
                 else:
-                    atlas_results = self.atlas_branch.forward_inference(atlas_features)
+                    atlas_results = self.atlas_branch.forward_inference(
+                        atlas_features
+                    )
             else:
                 atlas_results = self.atlas_branch(features)
             if self.need_collisions:
-                attraction_loss, penetration_loss, contact_infos, contact_metrics = compute_contact_loss(
+                (
+                    attr_loss,
+                    penetr_loss,
+                    contact_infos,
+                    contact_metrics,
+                ) = compute_contact_loss(
                     mano_results["verts"],
                     self.mano_branch.faces,
                     atlas_results["objpoints3d"],
@@ -337,12 +358,12 @@ class HandNet(nn.Module):
                         contact_infos["batch_ious"] = contact_ious
                         losses["contact_auc"] = contact_auc
                     contact_loss = (
-                        self.contact_lambda * attraction_loss
-                        + self.collision_lambda * penetration_loss
+                        self.contact_lambda * attr_loss
+                        + self.collision_lambda * penetr_loss
                     )
                     total_loss += contact_loss
-                    losses["penetr_loss"] = penetration_loss
-                    losses["attraction_loss"] = attraction_loss
+                    losses["penetration_loss"] = penetr_loss
+                    losses["attraction_loss"] = attr_loss
                     losses["contact_loss"] = contact_loss
                     for metric_name, metric_val in contact_metrics.items():
                         losses[metric_name] = metric_val

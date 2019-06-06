@@ -1,12 +1,9 @@
-import os
-import string
-
 import numpy as np
 
 # import skimage.io
 
 
-def load_obj(filename_obj, normalization=True, texture_size=4):
+def load_obj(filename_obj, normalization=True):
     """
     Load Wavefront .obj file.
     This function only supports vertices (v x x x) and faces (f x x x).

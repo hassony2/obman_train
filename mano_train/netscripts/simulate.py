@@ -1,13 +1,9 @@
-import argparse
 import json
 import os
-import pickle
 
 import numpy as np
-from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from mano_train.options import expopts, simulopts
 from mano_train.simulation import simulate
 from mano_train.objectutils.objectio import load_obj
 from mano_train.netscripts.savemano import load_batch_info
@@ -22,12 +18,15 @@ def full_simul(
     sample_step=1,
     workers=8,
     cluster=False,
-    intersect_volumes=True,
 ):
     if cluster:
-        vhacd_exe = "/sequoia/data1/yhasson/tools/v-hacd/build/linux/test/testVHACD"
+        vhacd_exe = "/sequoia/data1/yhasson/tools/"
+        "v-hacd/build/linux/test/testVHACD"
     else:
-        vhacd_exe = "/sequoia/data1/yhasson/code/pose_3d/mano_train/thirdparty/v-hacd/build/linux/test/testVHACD"
+        vhacd_exe = (
+            "/sequoia/data1/yhasson/code/pose_3d/mano_train/thirdparty/"
+        )
+        "v-hacd/build/linux/test/testVHACD"
     assert os.path.exists(exp_id), "{} does not exists!".format(exp_id)
     save_pickles = sorted(
         [

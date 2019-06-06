@@ -4,10 +4,10 @@ from enum import Enum
 import numpy as np
 import trimesh
 
-from mano_train.networks.branches.contactloss import get_depth_info
 
-
-def load_batch_info(save_path, faces_right, faces_left, scale=0.001, get_depth=True):
+def load_batch_info(
+    save_path, faces_right, faces_left, scale=0.001, get_depth=True
+):
     with open(save_path, "rb") as p_f:
         batch_data = pickle.load(p_f)
     sample, results = batch_data["sample"], batch_data["results"]
@@ -41,7 +41,11 @@ def load_batch_info(save_path, faces_right, faces_left, scale=0.001, get_depth=T
             if penetr_mask.sum() == 0:
                 max_depth = 0
             else:
-                result_close, result_distance, _ = trimesh.proximity.closest_point(
+                (
+                    result_close,
+                    result_distance,
+                    _,
+                ) = trimesh.proximity.closest_point(
                     obj_mesh, hand_vert[penetr_mask == 1]
                 )
                 max_depth = result_distance.max()
@@ -56,7 +60,9 @@ def save_batch_info(save_path, results, sample):
     untensor_sample = untensor(sample)
 
     with open(save_path, "wb") as p_f:
-        pickle.dump({"sample": untensor_sample, "results": untensor_results}, p_f)
+        pickle.dump(
+            {"sample": untensor_sample, "results": untensor_results}, p_f
+        )
 
 
 def untensor(results):
