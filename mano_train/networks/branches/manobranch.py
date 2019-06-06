@@ -69,7 +69,9 @@ class ManoBranch(nn.Module):
             # Initialize all nondiagonal items on rotation matrix weights to 0
             self.pose_reg.bias.data.fill_(0)
             weight_mask = (
-                self.pose_reg.weight.data.new(np.identity(3)).view(9).repeat(16)
+                self.pose_reg.weight.data.new(np.identity(3))
+                .view(9)
+                .repeat(16)
             )
             self.pose_reg.weight.data = torch.abs(
                 weight_mask.unsqueeze(1).repeat(1, 256).float()
@@ -78,7 +80,9 @@ class ManoBranch(nn.Module):
 
         # Shape layers
         if self.use_shape:
-            self.shape_reg = torch.nn.Sequential(nn.Linear(base_neurons[-1], 10))
+            self.shape_reg = torch.nn.Sequential(
+                nn.Linear(base_neurons[-1], 10)
+            )
 
         # Trans layers
         if self.use_trans:
@@ -109,7 +113,13 @@ class ManoBranch(nn.Module):
         self.faces = self.mano_layer_right.th_faces
 
     def forward(
-        self, inp, sides, root_palm=False, shape=None, pose=None, use_stereoshape=False
+        self,
+        inp,
+        sides,
+        root_palm=False,
+        shape=None,
+        pose=None,
+        use_stereoshape=False,
     ):
         base_features = self.base_layer(inp)
         pose = self.pose_reg(base_features)
@@ -122,8 +132,6 @@ class ManoBranch(nn.Module):
         # Prepare for splitting batch in right hands and left hands
         is_rights = inp.new_tensor([side == "right" for side in sides]).byte()
         is_lefts = 1 - is_rights
-        # Support for dataparrallel on multiple gpus, all sides should be the same in the batch!!!
-        # TODO remove ugly haposeding below
         is_rights = is_rights[: pose.shape[0]]
         is_lefts = is_lefts[: pose.shape[0]]
 
@@ -167,7 +175,10 @@ class ManoBranch(nn.Module):
             )
         if pose_left.shape[0] > 0:
             verts_left, joints_left = self.mano_layer_left(
-                pose_left, th_betas=shape_left, th_trans=trans_left, root_palm=root_palm
+                pose_left,
+                th_betas=shape_left,
+                th_trans=trans_left,
+                root_palm=root_palm,
             )
         if self.adapt_skeleton:
             if len(joints_left) != 0:
@@ -196,15 +207,24 @@ class ManoBranch(nn.Module):
                 shape[is_lefts] = shape_left
 
         # Gather results
-        results = {"verts": verts, "joints": joints, "shape": shape, "pose": pose}
+        results = {
+            "verts": verts,
+            "joints": joints,
+            "shape": shape,
+            "pose": pose,
+        }
         if self.use_trans:
             results["trans"] = trans
         return results
 
 
 def get_bone_ratio(pred_joints, target_joints, link=(9, 10)):
-    bone_ref = torch.norm(target_joints[:, link[1]] - target_joints[:, link[0]], dim=1)
-    bone_pred = torch.norm(pred_joints[:, link[1]] - pred_joints[:, link[0]], dim=1)
+    bone_ref = torch.norm(
+        target_joints[:, link[1]] - target_joints[:, link[0]], dim=1
+    )
+    bone_pred = torch.norm(
+        pred_joints[:, link[1]] - pred_joints[:, link[0]], dim=1
+    )
     bone_ratio = bone_ref / bone_pred
     return bone_ratio
 
@@ -259,7 +279,9 @@ class ManoLoss:
                 for link in links:
                     for joint_idx, n_joint_idx in zip(link[:-1], link[1:]):
                         bone_ratio = get_bone_ratio(
-                            pred_joints, target_joints, link=(joint_idx, n_joint_idx)
+                            pred_joints,
+                            target_joints,
+                            link=(joint_idx, n_joint_idx),
                         )
                         print(
                             "({}, {}) :{}".format(
@@ -290,7 +312,9 @@ class ManoLoss:
             mano_losses["pose_reg"] = pose_reg_loss
 
         if BaseQueries.hand_pcas in target and self.lambda_pca:
-            pca_loss = torch_f.mse_loss(preds["pcas"], target[BaseQueries.hand_pcas])
+            pca_loss = torch_f.mse_loss(
+                preds["pcas"], target[BaseQueries.hand_pcas]
+            )
             final_loss += self.lambda_pca * pca_loss
             pca_loss = pca_loss
         else:

@@ -1,7 +1,10 @@
 def add_nets3d_opts(parser):
     # Model structure
     parser.add_argument(
-        "--network", default="manonet", choices=["manonet"], help="Network architecture"
+        "--network",
+        default="manonet",
+        choices=["manonet"],
+        help="Network architecture",
     )
     parser.add_argument(
         "--right_only",
@@ -20,7 +23,8 @@ def add_nets3d_opts(parser):
     parser.add_argument(
         "--atlas_separate_encoder",
         action="store_true",
-        help="Use two encoders, one for the hand branch, one for the object branch",
+        help="Use two encoders, one for the hand branch"
+        "one for the object branch",
     )
     parser.add_argument(
         "--atlas_lambda",
@@ -33,8 +37,8 @@ def add_nets3d_opts(parser):
         "--atlas_final_lambda",
         default=0.167,
         type=float,
-        help="Weight of point supervision for final vertices (after translation and"
-        "scaling is applied)",
+        help="Weight of point supervision for final vertices"
+        "(after translation and scaling is applied)",
     )
     parser.add_argument(
         "--atlas_mesh",
@@ -47,14 +51,15 @@ def add_nets3d_opts(parser):
     parser.add_argument(
         "--atlas_mode",
         default="sphere",
-        choices=["sphere", "disk"],
+        choices=["sphere"],
         help="Whether to sample points on a sphere or on a disk mesh",
     )
     parser.add_argument(
         "--atlas_points_nb",
         default=600,
         type=int,
-        help="Number of points to sample for atlas, ignored if atlas_mesh is " "False",
+        help="Number of points to sample for atlas, ignored if atlas_mesh is "
+        "False",
     )
 
     # Options for mesh regularization
@@ -64,7 +69,10 @@ def add_nets3d_opts(parser):
         help="Penalize edges having very different sizes",
     )
     parser.add_argument(
-        "--atlas_lambda_laplacian", type=float, default=0, help="Penalize bendings"
+        "--atlas_lambda_laplacian",
+        type=float,
+        default=0,
+        help="Penalize bendings",
     )
 
     # Options to predict and supervise scale and translation in separate
@@ -105,7 +113,9 @@ def add_nets3d_opts(parser):
         help="Number of neurons in hidden layer for mano decoder",
     )
     parser.add_argument(
-        "--mano_use_shape", action="store_true", help="Predict MANO shape parameters"
+        "--mano_use_shape",
+        action="store_true",
+        help="Predict MANO shape parameters",
     )
     parser.add_argument(
         "--mano_lambda_shape",
@@ -147,7 +157,9 @@ def add_nets3d_opts(parser):
     )
 
     # Image encoder options
-    parser.add_argument("--resnet_version", default=18, type=int, choices=[18, 50])
+    parser.add_argument(
+        "--resnet_version", default=18, type=int, choices=[18, 50]
+    )
     parser.add_argument(
         "--no_pretrain",
         action="store_true",
@@ -156,18 +168,28 @@ def add_nets3d_opts(parser):
 
     # Freezing and initalization options
     parser.add_argument(
-        "--freeze_encoder", action="store_true", help="Freeze weights of encoder"
+        "--freeze_encoder",
+        action="store_true",
+        help="Freeze weights of encoder",
     )
     parser.add_argument(
-        "--freeze_batchnorm", action="store_true", help="Freeze batchnorm layers"
+        "--freeze_batchnorm",
+        action="store_true",
+        help="Freeze batchnorm layers",
     )
     parser.add_argument("--atlas_resume", help="Path to atlas checkpoint")
-    parser.add_argument("--atlas_decoder", help="Path to atlas decoder to load")
     parser.add_argument(
-        "--atlas_freeze_decoder", action="store_true", help="Freeze atlas decoder"
+        "--atlas_decoder", help="Path to atlas decoder to load"
     )
     parser.add_argument(
-        "--atlas_freeze_encoder", action="store_true", help="Freeze atlas encoder"
+        "--atlas_freeze_decoder",
+        action="store_true",
+        help="Freeze atlas decoder",
+    )
+    parser.add_argument(
+        "--atlas_freeze_encoder",
+        action="store_true",
+        help="Freeze atlas encoder",
     )
 
     # Options for contact loss
@@ -212,13 +234,21 @@ def add_train3d_opts(parser):
     parser.add_argument(
         "--epochs", default=30, type=int, help="number of total epochs to run"
     )
-    parser.add_argument("--train_batch", default=32, type=int, help="Train batch size")
     parser.add_argument(
-        "--test_batch", default=32, type=int, metavar="N", help="Test batch size"
+        "--train_batch", default=32, type=int, help="Train batch size"
+    )
+    parser.add_argument(
+        "--test_batch",
+        default=32,
+        type=int,
+        metavar="N",
+        help="Test batch size",
     )
 
     # Optimization options
-    parser.add_argument("--optimizer", default="adam", choices=["rms", "adam", "sgd"])
+    parser.add_argument(
+        "--optimizer", default="adam", choices=["rms", "adam", "sgd"]
+    )
     parser.add_argument(
         "--lr",
         "--learning-rate",
