@@ -43,7 +43,7 @@ class EvalUtil:
 
         if keypoint_vis is None:
             keypoint_vis = np.ones_like(keypoint_gt[:, 0])
-        keypoint_vis = np.squeeze(keypoint_vis).astype('bool')
+        keypoint_vis = np.squeeze(keypoint_vis).astype("bool")
 
         assert len(keypoint_gt.shape) == 2
         assert len(keypoint_pred.shape) == 2
@@ -64,7 +64,7 @@ class EvalUtil:
             return None
 
         data = np.array(self.data[kp_id])
-        pck = np.mean((data <= threshold).astype('float'))
+        pck = np.mean((data <= threshold).astype("float"))
         return pck
 
     def _get_epe(self, kp_id):
@@ -117,8 +117,13 @@ class EvalUtil:
         epe_mean_all = np.mean(np.array(epe_mean_all))
         epe_median_all = np.mean(np.array(epe_median_all))
         auc_all = np.mean(np.array(auc_all))
-        pck_curve_all = np.mean(np.array(pck_curve_all),
-                                0)  # mean only over keypoints
+        pck_curve_all = np.mean(np.array(pck_curve_all), 0)  # mean only over keypoints
 
-        return (epe_mean_all, epe_mean_joint, epe_median_all, auc_all,
-                pck_curve_all, thresholds)
+        return (
+            epe_mean_all,
+            epe_mean_joint,
+            epe_median_all,
+            auc_all,
+            pck_curve_all,
+            thresholds,
+        )

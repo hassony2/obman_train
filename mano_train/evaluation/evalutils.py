@@ -17,7 +17,7 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-class AverageMeters():
+class AverageMeters:
     def __init__(self):
         super().__init__()
         self.average_meters = {}

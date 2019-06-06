@@ -23,7 +23,8 @@ class AbsoluteBranch(nn.Module):
 
         layers = []
         for layer_idx, (inp_neurons, out_neurons) in enumerate(
-                zip(base_neurons[:-1], base_neurons[1:])):
+            zip(base_neurons[:-1], base_neurons[1:])
+        ):
             layers.append(nn.Linear(inp_neurons, out_neurons))
             layers.append(nn.ReLU())
         self.final_layer = nn.Linear(out_neurons, 3)

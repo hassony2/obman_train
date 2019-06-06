@@ -48,6 +48,7 @@ class LaplacianLoss(object):
         V = verts[0].data.cpu().numpy()
 
         from psbody.mesh import Mesh
+
         F = self.laplacian.F_np[0]
         mesh = Mesh(V, F)
 
@@ -95,7 +96,7 @@ class Laplacian(torch.autograd.Function):
         batchV = V_np.reshape(-1, 3)
 
         if self.L is None:
-            print('Computing the Laplacian!')
+            print("Computing the Laplacian!")
             # Compute cotangents
             sphere_batchV = self.vertices.unsqueeze(0).repeat(V.shape[0], 1, 1)
             if self.F.dim() == 2:
@@ -116,11 +117,10 @@ class Laplacian(torch.autograd.Function):
             cols = batchF[:, [2, 0, 1]].reshape(-1)
             # Final size is BN x BN
             BN = batchV.shape[0]
-            L = sparse.csr_matrix(
-                (batchC.reshape(-1), (rows, cols)), shape=(BN, BN))
+            L = sparse.csr_matrix((batchC.reshape(-1), (rows, cols)), shape=(BN, BN))
             L = L + L.T
             # np.sum on sparse is type 'matrix', so convert to np.array
-            M = sparse.diags(np.array(np.sum(L, 1)).reshape(-1), format='csr')
+            M = sparse.diags(np.array(np.sum(L, 1)).reshape(-1), format="csr")
             L = L - M
             # remember this
             self.L = L
@@ -163,9 +163,9 @@ def cotangent(V, F):
     v2 = torch.gather(V, 1, indices_repeat[:, :, :, 1])
     v3 = torch.gather(V, 1, indices_repeat[:, :, :, 2])
 
-    l1 = torch.sqrt(((v2 - v3)**2).sum(2))
-    l2 = torch.sqrt(((v3 - v1)**2).sum(2))
-    l3 = torch.sqrt(((v1 - v2)**2).sum(2))
+    l1 = torch.sqrt(((v2 - v3) ** 2).sum(2))
+    l2 = torch.sqrt(((v3 - v1) ** 2).sum(2))
+    l3 = torch.sqrt(((v1 - v2) ** 2).sum(2))
 
     # semiperimieters
     sp = (l1 + l2 + l3) * 0.5
@@ -173,9 +173,9 @@ def cotangent(V, F):
     # Heron's formula for area
     A = 2 * torch.sqrt(sp * (sp - l1) * (sp - l2) * (sp - l3))
 
-    cot23 = (l2**2 + l3**2 - l1**2)
-    cot31 = (l1**2 + l3**2 - l2**2)
-    cot12 = (l1**2 + l2**2 - l3**2)
+    cot23 = l2 ** 2 + l3 ** 2 - l1 ** 2
+    cot31 = l1 ** 2 + l3 ** 2 - l2 ** 2
+    cot12 = l1 ** 2 + l2 ** 2 - l3 ** 2
 
     # 2 in batch
     C = torch.stack([cot23, cot31, cot12], 2) / torch.unsqueeze(A, 2) / 4

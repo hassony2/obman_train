@@ -18,29 +18,33 @@ from handobjectdatasets.queries import TransQueries, BaseQueries
 
 
 class AENet(nn.Module):
-    def __init__(self,
-                 atlas_lambda=None,
-                 atlas_loss='chamfer',
-                 atlas_emd_regul=0.1,
-                 atlas_mode='sphere',
-                 atlas_mesh=True,
-                 atlas_residual=True,
-                 atlas_lambda_regul_edges=0,
-                 atlas_lambda_laplacian=0,
-                 atlas_predict_trans=False,
-                 atlas_trans_weight=1,
-                 atlas_use_tanh=False,
-                 atlas_ico_divisions=3,
-                 atlas_out_factor=200,
-                 bottleneck_size=512):
+    def __init__(
+        self,
+        atlas_lambda=None,
+        atlas_loss="chamfer",
+        atlas_emd_regul=0.1,
+        atlas_mode="sphere",
+        atlas_mesh=True,
+        atlas_residual=True,
+        atlas_lambda_regul_edges=0,
+        atlas_lambda_laplacian=0,
+        atlas_predict_trans=False,
+        atlas_trans_weight=1,
+        atlas_use_tanh=False,
+        atlas_ico_divisions=3,
+        atlas_out_factor=200,
+        bottleneck_size=512,
+    ):
         super().__init__()
         if atlas_ico_divisions == 3:
             points_nb = 642
-        self.bottleneck_size=bottleneck_size
+        self.bottleneck_size = bottleneck_size
         self.encoder = self.encoder = nn.Sequential(
             PointNetfeat(points_nb, global_feat=True, trans=False),
             nn.Linear(1024, self.bottleneck_size),
-            nn.BatchNorm1d(self.bottleneck_size), nn.ReLU())
+            nn.BatchNorm1d(self.bottleneck_size),
+            nn.ReLU(),
+        )
         self.atlas_branch = AtlasBranch(
             mode=atlas_mode,
             use_residual=atlas_residual,
@@ -49,7 +53,8 @@ class AENet(nn.Module):
             inference_ico_divisions=atlas_ico_divisions,
             bottleneck_size=bottleneck_size,
             use_tanh=atlas_use_tanh,
-            out_factor=atlas_out_factor)
+            out_factor=atlas_out_factor,
+        )
         self.atlas_lambda = atlas_lambda
         self.atlas_loss = AtlasLoss(
             atlas_loss=atlas_loss,
@@ -58,36 +63,35 @@ class AENet(nn.Module):
             edge_regul_lambda=atlas_lambda_regul_edges,
             lambda_laplacian=atlas_lambda_laplacian,
             laplacian_faces=self.atlas_branch.test_faces,
-            laplacian_verts=self.atlas_branch.test_verts)
+            laplacian_verts=self.atlas_branch.test_verts,
+        )
         self.atlas_mesh = atlas_mesh
 
     def decay_regul(self, gamma):
         self.atlas_loss.edge_regul_lambda = gamma * self.atlas_loss.edge_regul_lambda
         self.atlas_loss.lambda_laplacian = gamma * self.atlas_loss.lambda_laplacian
 
-    def forward(self,
-                sample,
-                no_loss=False,
-                return_features=False,
-                force_objects=False):
+    def forward(
+        self, sample, no_loss=False, return_features=False, force_objects=False
+    ):
         inp_points3d = sample[TransQueries.objpoints3d]
         features = self.encoder(inp_points3d)
         total_loss = None
         results = {}
         losses = {}
 
-        if (TransQueries.objpoints3d in sample.keys() and self.atlas_lambda):
+        if TransQueries.objpoints3d in sample.keys() and self.atlas_lambda:
             if self.atlas_mesh:
                 atlas_features = features
-                atlas_results = self.atlas_branch.forward_inference(
-                    atlas_features)
+                atlas_results = self.atlas_branch.forward_inference(atlas_features)
             else:
                 atlas_results = self.atlas_branch(features)
             for key, result in atlas_results.items():
                 results[key] = result
             if not no_loss:
                 atlas_total_loss, atlas_losses = self.atlas_loss.compute_loss(
-                    atlas_results, sample)
+                    atlas_results, sample
+                )
                 if total_loss is None:
                     total_loss = atlas_total_loss
                 else:
@@ -96,9 +100,9 @@ class AENet(nn.Module):
                 for key, val in atlas_losses.items():
                     losses[key] = val
         if total_loss is not None:
-            losses['total_loss'] = total_loss
+            losses["total_loss"] = total_loss
         else:
-            losses['total_loss'] = None
+            losses["total_loss"] = None
         return total_loss, results, losses
 
 
@@ -109,14 +113,16 @@ class STN3d(nn.Module):
         self.conv1 = torch.nn.Conv1d(3, 64, 1)
         self.conv2 = torch.nn.Conv1d(64, 128, 1)
         self.conv3 = torch.nn.Conv1d(128, 1024, 1)
-        #self.mp1 = torch.nn.MaxPool1d(num_points)
+        # self.mp1 = torch.nn.MaxPool1d(num_points)
         self.fc1 = nn.Linear(1024, 512)
         self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 9)
         self.relu = nn.ReLU()
-        self.identity = torch.from_numpy(
-            np.array([1, 0, 0, 0, 1, 0, 0, 0, 1]).astype(np.float32)).view(
-                1, 9).cuda()
+        self.identity = (
+            torch.from_numpy(np.array([1, 0, 0, 0, 1, 0, 0, 0, 1]).astype(np.float32))
+            .view(1, 9)
+            .cuda()
+        )
 
     def forward(self, x):
         batch_size = x.size()[0]
@@ -137,7 +143,9 @@ class STN3d(nn.Module):
 
 
 class PointNetfeat(nn.Module):
-    def __init__(self, num_points=2500, global_feat=True, trans=False, feature_size=1024):
+    def __init__(
+        self, num_points=2500, global_feat=True, trans=False, feature_size=1024
+    ):
         super(PointNetfeat, self).__init__()
         self.stn = STN3d(num_points=num_points)
         self.conv1 = nn.Conv1d(3, 64, 1)

@@ -32,10 +32,9 @@ class ChamferLoss(nn.Module):
             dtype = torch.LongTensor
         diag_ind_x = torch.arange(0, num_points_x).type(dtype)
         diag_ind_y = torch.arange(0, num_points_y).type(dtype)
-        rx = xx[:, diag_ind_x, diag_ind_x].unsqueeze(1).expand_as(
-            zz.transpose(2, 1))
+        rx = xx[:, diag_ind_x, diag_ind_x].unsqueeze(1).expand_as(zz.transpose(2, 1))
         ry = yy[:, diag_ind_y, diag_ind_y].unsqueeze(1).expand_as(zz)
-        P = (rx.transpose(2, 1) + ry - 2 * zz)
+        P = rx.transpose(2, 1) + ry - 2 * zz
         return P
 
 
@@ -45,12 +44,13 @@ class PointGenCon(nn.Module):
         self.use_tanh = use_tanh
         self.out_factor = out_factor
         super(PointGenCon, self).__init__()
-        self.conv1 = torch.nn.Conv1d(self.bottleneck_size,
-                                     self.bottleneck_size, 1)
-        self.conv2 = torch.nn.Conv1d(self.bottleneck_size,
-                                     int(self.bottleneck_size / 2), 1)
+        self.conv1 = torch.nn.Conv1d(self.bottleneck_size, self.bottleneck_size, 1)
+        self.conv2 = torch.nn.Conv1d(
+            self.bottleneck_size, int(self.bottleneck_size / 2), 1
+        )
         self.conv3 = torch.nn.Conv1d(
-            int(self.bottleneck_size / 2), int(self.bottleneck_size / 4), 1)
+            int(self.bottleneck_size / 2), int(self.bottleneck_size / 4), 1
+        )
         self.conv4 = torch.nn.Conv1d(int(self.bottleneck_size / 4), 3, 1)
 
         if self.use_tanh:
@@ -73,11 +73,9 @@ class PointGenCon(nn.Module):
 
 
 class DecoderBlock(nn.Module):
-    def __init__(self,
-                 bottleneck_size=2500,
-                 res_size=100,
-                 out_factor=200,
-                 residual=True):
+    def __init__(
+        self, bottleneck_size=2500, res_size=100, out_factor=200, residual=True
+    ):
         super().__init__()
         self.bottleneck_size = bottleneck_size
         self.res_size = res_size
@@ -103,25 +101,25 @@ class DecoderBlock(nn.Module):
 
 
 class PointGenConResidual(nn.Module):
-    def __init__(self,
-                 bottleneck_size=2500,
-                 res_size=256,
-                 out_factor=200,
-                 pred_scale=False):
+    def __init__(
+        self, bottleneck_size=2500, res_size=256, out_factor=200, pred_scale=False
+    ):
         self.bottleneck_size = bottleneck_size
         self.out_factor = out_factor
         super().__init__()
         self.residual1 = DecoderBlock(
-            bottleneck_size, res_size=res_size, out_factor=1, residual=True)
+            bottleneck_size, res_size=res_size, out_factor=1, residual=True
+        )
         self.residual2 = DecoderBlock(
-            bottleneck_size, res_size=res_size, out_factor=1, residual=True)
+            bottleneck_size, res_size=res_size, out_factor=1, residual=True
+        )
         self.residual3 = DecoderBlock(
-            bottleneck_size, res_size=res_size, out_factor=1, residual=False)
+            bottleneck_size, res_size=res_size, out_factor=1, residual=False
+        )
         self.pred_scale = pred_scale
         if pred_scale:
             base_layers = []
-            base_layers.append(
-                nn.Linear(bottleneck_size - 3, int(bottleneck_size / 2)))
+            base_layers.append(nn.Linear(bottleneck_size - 3, int(bottleneck_size / 2)))
             base_layers.append(nn.ReLU())
             base_layers.append(nn.Linear(int(bottleneck_size / 2), 1))
             self.scale_decoder = nn.Sequential(*base_layers)
