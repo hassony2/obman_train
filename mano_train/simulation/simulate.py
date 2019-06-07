@@ -9,18 +9,22 @@ import tempfile
 import numpy as np
 import pybullet as p
 import skvideo
+import skvideo.io as skvio
 
 hostname = socket.gethostname()
 if hostname == "benat":
-    skvideo.setFFmpegPath("/home/local2/yhasson/anaconda3/envs/pytorch-env/bin")
-import skvideo.io as skvio
+    skvideo.setFFmpegPath(
+        "/home/local2/yhasson/anaconda3/envs/pytorch-env/bin"
+    )
 
 
 def take_picture(renderer, width=256, height=256, scale=0.001, conn_id=None):
     view_matrix = p.computeViewMatrix(
         [0, 0, -1], [0, 0, 0], [0, -1, 0], physicsClientId=conn_id
     )
-    proj_matrix = p.computeProjectionMatrixFOV(20, 1, 0.05, 2, physicsClientId=conn_id)
+    proj_matrix = p.computeProjectionMatrixFOV(
+        20, 1, 0.05, 2, physicsClientId=conn_id
+    )
     w, h, rgba, depth, mask = p.getCameraImage(
         width=width,
         height=height,
@@ -53,7 +57,9 @@ def process_sample(
         conn_id = p.connect(p.DIRECT)
     if sample_idx % sample_vis_freq == 0:
         save_video = True
-        save_video_path = os.path.join(save_gif_folder, "{:08d}.gif".format(sample_idx))
+        save_video_path = os.path.join(
+            save_gif_folder, "{:08d}.gif".format(sample_idx)
+        )
         save_obj_path = os.path.join(
             save_obj_folder, "{:08d}_obj.obj".format(sample_idx)
         )
@@ -129,8 +135,12 @@ def run_simulation(
     hand_indicies = hand_faces.flatten().tolist()
     p.resetSimulation(physicsClientId=conn_id)
     p.setPhysicsEngineParameter(enableFileCaching=0, physicsClientId=conn_id)
-    p.setPhysicsEngineParameter(numSolverIterations=150, physicsClientId=conn_id)
-    p.setPhysicsEngineParameter(fixedTimeStep=simulation_step, physicsClientId=conn_id)
+    p.setPhysicsEngineParameter(
+        numSolverIterations=150, physicsClientId=conn_id
+    )
+    p.setPhysicsEngineParameter(
+        fixedTimeStep=simulation_step, physicsClientId=conn_id
+    )
     p.setGravity(0, 9.8, 0, physicsClientId=conn_id)
 
     # add hand
@@ -192,7 +202,10 @@ def run_simulation(
         save_obj(obj_tmp_fname, obj_verts, obj_faces)
 
         if not vhacd(obj_tmp_fname, vhacd_exe, resolution=vhacd_resolution):
-            raise RuntimeError("Cannot compute convex hull decomposition")
+            raise RuntimeError(
+                "Cannot compute convex hull "
+                "decomposition for {}".format(obj_tmp_fname)
+            )
 
         obj_collision_id = p.createCollisionShape(
             p.GEOM_MESH, fileName=obj_tmp_fname, physicsClientId=conn_id
@@ -237,7 +250,6 @@ def run_simulation(
         images = []
         if use_gui:
             renderer = p.ER_BULLET_HARDWARE_OPENGL
-            # renderer = p.ER_TINY_RENDERER
         else:
             renderer = p.ER_TINY_RENDERER
 
@@ -265,7 +277,9 @@ def run_simulation(
     if save_video:
         write_video(images, save_video_path)
         print("Saved gif to {}".format(save_video_path))
-    pos_end = p.getBasePositionAndOrientation(obj_body_id, physicsClientId=conn_id)[0]
+    pos_end = p.getBasePositionAndOrientation(
+        obj_body_id, physicsClientId=conn_id
+    )[0]
 
     if use_vhacd:
         os.remove(obj_tmp_fname)
@@ -294,8 +308,9 @@ def vhacd(
 ):
 
     cmd_line = (
-        '"{}" --input "{}" --resolution {} --concavity {:g} --planeDownsampling {} '
-        "--convexhullDownsampling {} --alpha {:g} --beta {:g} --maxhulls {:g} --pca {:b} "
+        '"{}" --input "{}" --resolution {} --concavity {:g} '
+        "--planeDownsampling {} --convexhullDownsampling {} "
+        "--alpha {:g} --beta {:g} --maxhulls {:g} --pca {:b} "
         "--mode {:b} --maxNumVerticesPerCH {} --minVolumePerCH {:g} "
         '--output "{}" --log "/dev/null"'.format(
             vhacd_path,
@@ -318,7 +333,12 @@ def vhacd(
 
     devnull = open(os.devnull, "wb")
     vhacd_process = Popen(
-        cmd_line, bufsize=-1, close_fds=True, shell=True, stdout=devnull, stderr=devnull
+        cmd_line,
+        bufsize=-1,
+        close_fds=True,
+        shell=True,
+        stdout=devnull,
+        stderr=devnull,
     )
     return 0 == vhacd_process.wait()
 

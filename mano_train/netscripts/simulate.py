@@ -1,11 +1,11 @@
 import json
 import os
+import pickle
 
 import numpy as np
 from joblib import Parallel, delayed
 
 from mano_train.simulation import simulate
-from mano_train.objectutils.objectio import load_obj
 from mano_train.netscripts.savemano import load_batch_info
 
 
@@ -37,8 +37,12 @@ def full_simul(
     )
 
     # Load mano faces
-    _, faces_right = load_obj("misc/mano/mano_right.obj")
-    _, faces_left = load_obj("misc/mano/mano_left.obj")
+    with open("misc/mano/MANO_RIGHT.pkl", "rb") as p_f:
+        mano_right_data = pickle.load(p_f, encoding="latin1")
+        faces_right = mano_right_data["f"]
+    with open("misc/mano/MANO_LEFT.pkl", "rb") as p_f:
+        mano_left_data = pickle.load(p_f, encoding="latin1")
+        faces_left = mano_left_data["f"]
 
     batch_infos = Parallel(n_jobs=workers, verbose=5)(
         delayed(load_batch_info)(

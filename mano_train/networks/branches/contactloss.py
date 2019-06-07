@@ -2,12 +2,16 @@ import numpy as np
 import trimesh
 import torch
 
-from mano_train.networks.branches.contactutils import batch_mesh_contains_points
+from mano_train.networks.branches.contactutils import (
+    batch_mesh_contains_points,
+)
 from handobjectdatasets import contactutils
 
 
 def batch_index_select(inp, dim, index):
-    views = [inp.shape[0]] + [1 if i != dim else -1 for i in range(1, len(inp.shape))]
+    views = [inp.shape[0]] + [
+        1 if i != dim else -1 for i in range(1, len(inp.shape))
+    ]
     expanse = list(inp.shape)
     expanse[0] = -1
     expanse[dim] = -1
@@ -36,7 +40,9 @@ def meshiou(gt_dists, pred_dists, threshs=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]):
     for thresh in threshs:
         ious = thresh_ious(gt_dists, pred_dists, thresh)
         all_ious.append(ious)
-    iou_auc = np.mean(np.trapz(torch.stack(all_ious).cpu().numpy(), axis=0, x=threshs))
+    iou_auc = np.mean(
+        np.trapz(torch.stack(all_ious).cpu().numpy(), axis=0, x=threshs)
+    )
     batch_ious = torch.stack(all_ious).mean(1)
     return batch_ious, iou_auc
 
@@ -63,7 +69,11 @@ def batch_pairwise_dist(x, y, use_cuda=True):
         dtype = torch.LongTensor
     diag_ind_x = torch.arange(0, num_points_x).type(dtype)
     diag_ind_y = torch.arange(0, num_points_y).type(dtype)
-    rx = xx[:, diag_ind_x, diag_ind_x].unsqueeze(1).expand_as(zz.transpose(2, 1))
+    rx = (
+        xx[:, diag_ind_x, diag_ind_x]
+        .unsqueeze(1)
+        .expand_as(zz.transpose(2, 1))
+    )
     ry = yy[:, diag_ind_y, diag_ind_y].unsqueeze(1).expand_as(zz)
     P = rx.transpose(2, 1) + ry - 2 * zz
     return P
@@ -117,7 +127,9 @@ def get_contact_info(
         result_close, result_distance, _ = trimesh.proximity.closest_point(
             obj_mesh, hand_vert
         )
-    penetrating, exterior = mesh_vert_int_exts(obj_mesh, hand_vert, result_distance)
+    penetrating, exterior = mesh_vert_int_exts(
+        obj_mesh, hand_vert, result_distance
+    )
 
     below_dist = result_distance < contact_thresh
     missed_mask = below_dist & exterior
@@ -128,7 +140,9 @@ def get_depth_info(obj_mesh, hand_verts):
     result_close, result_distance, _ = trimesh.proximity.closest_point(
         obj_mesh, hand_verts
     )
-    penetrating, exterior = mesh_vert_int_exts(obj_mesh, hand_verts, result_distance)
+    penetrating, exterior = mesh_vert_int_exts(
+        obj_mesh, hand_verts, result_distance
+    )
     return result_close, result_distance, penetrating
 
 
@@ -174,12 +188,18 @@ def compute_contact_loss(
         if contact_target == "all":
             contact_vals = ((results_close - hand_verts_pt) ** 2).sum(2)
         elif contact_target == "obj":
-            contact_vals = ((results_close - hand_verts_pt.detach()) ** 2).sum(2)
+            contact_vals = ((results_close - hand_verts_pt.detach()) ** 2).sum(
+                2
+            )
         elif contact_target == "hand":
-            contact_vals = ((results_close.detach() - hand_verts_pt) ** 2).sum(2)
+            contact_vals = ((results_close.detach() - hand_verts_pt) ** 2).sum(
+                2
+            )
         else:
             raise ValueError(
-                "contact_target {} not in [all|obj|hand]".format(contact_target)
+                "contact_target {} not in [all|obj|hand]".format(
+                    contact_target
+                )
             )
         below_dist = mins21 < (contact_thresh ** 2)
     elif contact_mode == "dist":
@@ -187,35 +207,50 @@ def compute_contact_loss(
         contact_vals = anchor_dists
         below_dist = mins21 < contact_thresh
     elif contact_mode == "dist_tanh":
-        # Use thresh * (dist / thresh) distances to penalize contact (max derivative is 1 at 0)
-        contact_vals = contact_thresh * torch.tanh(anchor_dists / contact_thresh)
+        # Use thresh * (dist / thresh) distances to penalize contact
+        # (max derivative is 1 at 0)
+        contact_vals = contact_thresh * torch.tanh(
+            anchor_dists / contact_thresh
+        )
         # All points are taken into account
         below_dist = torch.ones_like(mins21).byte()
     else:
         raise ValueError(
-            "contact_mode {} not in [dist_sq|dist|dist_tanh]".format(contact_mode)
+            "contact_mode {} not in [dist_sq|dist|dist_tanh]".format(
+                contact_mode
+            )
         )
     if collision_mode == "dist_sq":
         # Use squared distances to penalize contact
         if contact_target == "all":
             collision_vals = ((results_close - hand_verts_pt) ** 2).sum(2)
         elif contact_target == "obj":
-            collision_vals = ((results_close - hand_verts_pt.detach()) ** 2).sum(2)
+            collision_vals = (
+                (results_close - hand_verts_pt.detach()) ** 2
+            ).sum(2)
         elif contact_target == "hand":
-            collision_vals = ((results_close.detach() - hand_verts_pt) ** 2).sum(2)
+            collision_vals = (
+                (results_close.detach() - hand_verts_pt) ** 2
+            ).sum(2)
         else:
             raise ValueError(
-                "contact_target {} not in [all|obj|hand]".format(contact_target)
+                "contact_target {} not in [all|obj|hand]".format(
+                    contact_target
+                )
             )
     elif collision_mode == "dist":
         # Use distance to penalize collision
         collision_vals = anchor_dists
     elif collision_mode == "dist_tanh":
-        # Use thresh * (dist / thresh) distances to penalize contact (max derivative is 1 at 0)
-        collision_vals = collision_thresh * torch.tanh(anchor_dists / collision_thresh)
+        # Use thresh * (dist / thresh) distances to penalize contact
+        # (max derivative is 1 at 0)
+        collision_vals = collision_thresh * torch.tanh(
+            anchor_dists / collision_thresh
+        )
     else:
         raise ValueError(
-            "collision_mode {} not in [dist_sq|dist|dist_tanh]".format(collision_mode)
+            "collision_mode {} not in "
+            "[dist_sq|dist|dist_tanh]".format(collision_mode)
         )
 
     missed_mask = below_dist & exterior
@@ -226,15 +261,15 @@ def compute_contact_loss(
         missed_mask = missed_mask & tips
     elif contact_zones == "zones":
         _, contact_zones = contactutils.load_contacts(
-            "assets/mano/contact_zones_synthgrasps_10_0.01.pkl"
+            "assets/contact_zones.pkl"
         )
         contact_matching = torch.zeros_like(missed_mask)
         for zone_idx, zone_idxs in contact_zones.items():
             min_zone_vals, min_zone_idxs = mins21[:, zone_idxs].min(1)
-            contact_idxs = mins12.new(zone_idxs)[min_zone_idxs]
+            cont_idxs = mins12.new(zone_idxs)[min_zone_idxs]
             # For each batch keep the closest point from the contact zone
             contact_matching[
-                [torch.range(0, len(contact_idxs) - 1).long(), contact_idxs.long()]
+                [torch.range(0, len(cont_idxs) - 1).long(), cont_idxs.long()]
             ] = 1
         missed_mask = missed_mask & contact_matching
     elif contact_zones == "all":
@@ -254,13 +289,20 @@ def compute_contact_loss(
         missed_loss = missed_loss + sym_loss
     # print('penetr_nb: {}'.format(penetr_mask.sum()))
     # print('missed_nb: {}'.format(missed_mask.sum()))
-    max_penetr_depth = (anchor_dists.detach() * penetr_mask.float()).max(1)[0].mean()
-    mean_penetr_depth = (anchor_dists.detach() * penetr_mask.float()).mean(1).mean()
+    max_penetr_depth = (
+        (anchor_dists.detach() * penetr_mask.float()).max(1)[0].mean()
+    )
+    mean_penetr_depth = (
+        (anchor_dists.detach() * penetr_mask.float()).mean(1).mean()
+    )
     contact_info = {
         "attraction_masks": missed_mask,
         "repulsion_masks": penetr_mask,
         "contact_points": results_close,
         "min_dists": mins21,
     }
-    metrics = {"max_penetr": max_penetr_depth, "mean_penetr": mean_penetr_depth}
+    metrics = {
+        "max_penetr": max_penetr_depth,
+        "mean_penetr": mean_penetr_depth,
+    }
     return missed_loss, penetr_loss, contact_info, metrics

@@ -12,7 +12,6 @@ def load_batch_info(
         batch_data = pickle.load(p_f)
     sample, results = batch_data["sample"], batch_data["results"]
     obj_faces = results["objfaces"]
-
     hand_verts = results["verts"]
     obj_verts = results["objpoints3d"]
     penetr_masks = results["contact_info"]["repulsion_masks"]
