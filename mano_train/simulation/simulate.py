@@ -206,6 +206,8 @@ def run_simulation(
                 "Cannot compute convex hull "
                 "decomposition for {}".format(obj_tmp_fname)
             )
+        else:
+            print(f"Succeeded vhacd decomp of {obj_tmp_fname}")
 
         obj_collision_id = p.createCollisionShape(
             p.GEOM_MESH, fileName=obj_tmp_fname, physicsClientId=conn_id

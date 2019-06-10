@@ -18,11 +18,7 @@ from mano_train.datautils import ConcatDataloader
 from mano_train.netscripts.get_datasets import get_dataset
 from mano_train.modelutils import modelio
 from mano_train.visualize import visualizemeshes
-from mano_train.networks.branches.emutils import batch_emd
-from mano_train.networks.branches.contactloss import (
-    compute_contact_loss,
-    batch_pairwise_dist,
-)
+from mano_train.networks.branches.contactloss import compute_contact_loss
 
 from handobjectdatasets.queries import BaseQueries, TransQueries
 
@@ -37,7 +33,9 @@ def save_obj(filename, verticies, faces):
 
 def get_opts(resume_checkpoint):
     if resume_checkpoint.endswith("tar"):
-        resume_checkpoint = os.path.join("/", *resume_checkpoint.split("/")[:-1])
+        resume_checkpoint = os.path.join(
+            "/", *resume_checkpoint.split("/")[:-1]
+        )
     opt_path = os.path.join(resume_checkpoint, "opt.pkl")
     with open(opt_path, "rb") as p_f:
         opts = pickle.load(p_f)
@@ -45,7 +43,11 @@ def get_opts(resume_checkpoint):
 
 
 def reload_model(
-    model_path, checkpoint_opts, mano_root="misc/mano", ico_divisions=3, no_beta=False
+    model_path,
+    checkpoint_opts,
+    mano_root="misc/mano",
+    ico_divisions=3,
+    no_beta=False,
 ):
     if "absolute_lambda" not in checkpoint_opts:
         checkpoint_opts["absolute_lambda"] = 0
@@ -109,7 +111,9 @@ def reload_model(
         modelio.load_checkpoint(model, resume_path=model_path, strict=True)
     except RuntimeError:
         traceback.print_exc()
-        warnings.warn("Couldn' load model in strict mode, trying without strict")
+        warnings.warn(
+            "Couldn' load model in strict mode, trying without strict"
+        )
         modelio.load_checkpoint(model, resume_path=model_path, strict=False)
     return model
 
@@ -187,10 +191,14 @@ def get_samples_score_interval(
 ):
     assert (
         interval[0] >= 0 and interval[0] <= 1
-    ), "bounds of interval should be in [0, 1], got lower bound {}".format(interval[0])
+    ), "bounds of interval should be in [0, 1], got lower bound {}".format(
+        interval[0]
+    )
     assert (
         interval[1] >= 0 and interval[1] <= 1
-    ), "bounds of interval should be in [0, 1], got upper bound {}".format(interval[1])
+    ), "bounds of interval should be in [0, 1], got upper bound {}".format(
+        interval[1]
+    )
     assert (
         interval[0] < interval[1]
     ), "Lower bound {} should be lower then upper bound {}".format(
@@ -200,7 +208,9 @@ def get_samples_score_interval(
     upper_idx = math.ceil(interval[1] * len(sorted_losses))
     selected_losses = sorted_losses[lower_idx:upper_idx]
 
-    selected_samples = [sorted_samples[idx] for idx in range(lower_idx, upper_idx)]
+    selected_samples = [
+        sorted_samples[idx] for idx in range(lower_idx, upper_idx)
+    ]
     if reverse:
         selected_losses = list(reversed(selected_losses))
         selected_samples = list(reversed(selected_samples))
@@ -279,7 +289,6 @@ def show_meshes(
     save_root="/sequoia/data2/yhasson/code/mano_train/data/results",
     show_contacts=False,
     show_gt=True,
-    get_emd=False,
     show_losses=[
         "mano_verts3d",
         "mano_joints3d",
@@ -294,8 +303,6 @@ def show_meshes(
     loader(ConcatDataloader): dataloader
     model: trained neural network
     """
-    if get_emd:
-        show_losses.append("atlas_emd")
     renderers = []
     if isinstance(model, (list, tuple)):
         models = model
@@ -315,11 +322,6 @@ def show_meshes(
                 _, results, losses = model.forward(
                     sample, no_loss=False, force_objects=force_objects
                 )
-                if get_emd:
-                    emd_vals = batch_emd(
-                        sample[TransQueries.objpoints3d], results["objpoints3d"]
-                    )
-                    losses["atlas_emd"] = np.mean(emd_vals)
                 if model_idx == 0:
                     filter_losses = OrderedDict(
                         (loss_name, [loss_val.item()])
@@ -437,7 +439,9 @@ def render_mesh(
         )
         save_img_folder = os.path.join(save_model_root, "images")
         os.makedirs(save_img_folder, exist_ok=True)
-        save_img_path = os.path.join(save_img_folder, "{:08d}.png".format(sample_idx))
+        save_img_path = os.path.join(
+            save_img_folder, "{:08d}.png".format(sample_idx)
+        )
         img = (sample[TransQueries.images][0] + 0.5).permute(1, 2, 0)
         scipy.misc.toimage(img, cmin=0, cmax=1).save(save_img_path)
         scale = 0.001
@@ -447,11 +451,15 @@ def render_mesh(
             save_path = os.path.join(
                 save_pkl_folder, "mesh_penetr_{:04d}.pkl".format(sample_idx)
             )
-            save_meshes_dict(save_path, pred_points, pred_faces, pred_verts, mano_faces)
+            save_meshes_dict(
+                save_path, pred_points, pred_faces, pred_verts, mano_faces
+            )
             save_obj_path = os.path.join(
                 save_obj_folder, "{:08d}_obj.obj".format(sample_idx)
             )
-            obj_mesh = trimesh.load({"vertices": pred_points, "faces": pred_faces})
+            obj_mesh = trimesh.load(
+                {"vertices": pred_points, "faces": pred_faces}
+            )
             trimesh.repair.fix_normals(obj_mesh)
             obj_verts = np.array(obj_mesh.vertices)
             obj_faces = np.array(obj_mesh.faces)
@@ -477,7 +485,7 @@ def render_mesh(
         scene_children_base = [c, p3js.AmbientLight(intensity=0.4)]
         scene_children = scene_children_base + hand_obj_children
         if show_contacts:
-            missed_loss, penetr_loss, contact_infos, metrics = compute_contact_loss(
+            miss_loss, pen_loss, contact_infos, metrics = compute_contact_loss(
                 torch.Tensor(pred_verts).unsqueeze(0).cuda(),
                 mano_faces,
                 torch.Tensor(pred_points).unsqueeze(0).cuda(),
@@ -494,8 +502,12 @@ def render_mesh(
             penetrating_close_verts = (
                 all_close_matches[0][all_penetr_masks[0]].cpu().numpy()
             )
-            missed_verts = torch.Tensor(pred_verts)[all_missed_masks[0]].cpu().numpy()
-            missed_close_verts = all_close_matches[0][all_missed_masks[0]].cpu().numpy()
+            missed_verts = (
+                torch.Tensor(pred_verts)[all_missed_masks[0]].cpu().numpy()
+            )
+            missed_close_verts = (
+                all_close_matches[0][all_missed_masks[0]].cpu().numpy()
+            )
 
             attraction_lines_children = visualizemeshes.lines_children(
                 missed_verts, missed_close_verts, color="green"
@@ -504,7 +516,9 @@ def render_mesh(
                 penetrating_verts, penetrating_close_verts, color="orange"
             )
             scene_children = (
-                scene_children + attraction_lines_children + repulsion_lines_children
+                scene_children
+                + attraction_lines_children
+                + repulsion_lines_children
             )
         if show_gt:
             if TransQueries.joints3d in sample:
@@ -522,7 +536,7 @@ def render_mesh(
         renderer = p3js.Renderer(
             camera=c, scene=scene, controls=[controls], width=400, height=400
         )
-        display(renderer)
+        # display(renderer)
     else:
         renderer = None
     return renderer

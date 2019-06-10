@@ -18,16 +18,12 @@ def full_simul(
     sample_step=1,
     workers=8,
     cluster=False,
+    vhacd_exe=None,
 ):
-    if cluster:
-        vhacd_exe = "/sequoia/data1/yhasson/tools/"
-        "v-hacd/build/linux/test/testVHACD"
-    else:
-        vhacd_exe = (
-            "/sequoia/data1/yhasson/code/pose_3d/mano_train/thirdparty/"
-        )
-        "v-hacd/build/linux/test/testVHACD"
     assert os.path.exists(exp_id), "{} does not exists!".format(exp_id)
+    assert os.path.exists(vhacd_exe), (
+        f"VHACD executable {vhacd_exe}" "does not exists!"
+    )
     save_pickles = sorted(
         [
             os.path.join(exp_id, filename)

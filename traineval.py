@@ -359,6 +359,7 @@ def main(args):
                     workers=args.workers,
                     cluster=True,
                     use_gui=False,
+                    vhacd_exe=args.vhacd_exe,
                 )
             return
 
