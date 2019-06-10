@@ -18,7 +18,7 @@ from mano_train.demo.preprocess import prepare_input, preprocess_frame
 def forward_pass_3d(model, input_image, pred_obj=True):
     sample = {}
     sample[TransQueries.images] = input_image
-    sample[BaseQueries.sides] = [args.hand_side]
+    sample[BaseQueries.sides] = ["left"]
     sample[TransQueries.joints3d] = input_image.new_ones((1, 21, 3)).float()
     sample["root"] = "wrist"
     if pred_obj:
@@ -38,9 +38,6 @@ if __name__ == "__main__":
         help="Path to checkpoint",
         default="release_models/obman/checkpoint.pth.tar",
     )
-    parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--hand_side", default="left")
-    parser.add_argument("--pred_obj", action="store_true")
     parser.add_argument(
         "--image_path",
         help="Path to image",
@@ -48,9 +45,6 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--no_beta", action="store_true", help="Force shape to average"
-    )
-    parser.add_argument(
-        "--flip_left_right", action="store_true", help="Force shape to average"
     )
     args = parser.parse_args()
     argutils.print_args(args)

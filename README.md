@@ -12,7 +12,7 @@
 - Download  ShapeNetCore v2 object meshes from the [ShapeNet official website](https://www.shapenet.org/)
 - Create a symlink `ln -s /sequoia/data2/dataset/shapenet/ShapeNetCore.v2 datasymlinks/ShapeNetCore.v2`
 
-Your data structure should now look like 
+Your data structure should now look like
 
 ```
 obman_train/
@@ -54,12 +54,30 @@ obman_render/
 
 ## Demo
 
-We provide a model trained on the synthetic ObMan dataset.
+
+We provide a model trained on the synthetic ObMan dataset
+
+### Video demo
 
 You can test it on a recorded video or live using a webcam by launching :
 
-`python webcam_demo.py --resume release_models/obman/checkpoint.pth.tar  --pred_obj --hand_side left`
+`python webcam_demo.py --resume release_models/obman/checkpoint.pth.tar  --hand_side left`
 
+Hand side detection is not handled in this pipeline, therefore, you should explicitely indicate whether you want to use the right or left hand with `--hand_side`.
+
+Note that the video demo has some lag time, which comes from the visualization bottleneck (matplotlib image rendering is quite slow).
+
+### Single image demo
+
+`python image_demo.py --resume release_models/obman/checkpoint.pth.tar`
+
+Running the demo should produce the following outputs.
+
+![can_in](readme_assets/images/can_in.png)
+
+![can_out](readme_assets/images/can_output.png)
+
+In this demo, both the original and flipped inputs are fed, and the outputs are therefore presented for the input treated as a right and a left hand side by side.
 
 ### Limitations
 
@@ -75,7 +93,7 @@ You can test it on a recorded video or live using a webcam by launching :
 
 ## AtlasNet code
 
-Code related to [AtlasNet](http://imagine.enpc.fr/~groueixt/atlasnet/) is in large part adapted from the official [AtlasNet repository](https://github.com/ThibaultGROUEIX/AtlasNet). 
+Code related to [AtlasNet](http://imagine.enpc.fr/~groueixt/atlasnet/) is in large part adapted from the official [AtlasNet repository](https://github.com/ThibaultGROUEIX/AtlasNet).
 Thanks [Thibault](https://github.com/ThibaultGROUEIX/) for the provided code !
 
 ## Hand evaluation code
