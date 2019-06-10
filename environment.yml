@@ -1,0 +1,18 @@
+name: obman_train
+channels:
+  - menpo
+  - defaults
+  - conda-forge
+dependencies:
+  - opencv
+  - python=3.7
+  - matplotlib
+  - numpy
+  - pillow
+  - pytorch
+  - trimesh
+  - tqdm
+  - pip
+  - pip:
+    - git+https://github.com/hassony2/chumpy.git
+    - opencv-python

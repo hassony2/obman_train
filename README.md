@@ -30,10 +30,16 @@ obman_train/
 - Download model files from TODO
 - unzip `unzip release_models.zip`
 
+## Install python dependencies
+
+- create conda environment with dependencies: `conda env create -f environment.yml`
+- activate environment: `conda activate obman_train`
+
 
 ## Install the MANO PyTorch layer
 
 - Follow the instructions from [here](https://github.com/hassony2/manopth)
+
 
 ### Download the MANO model files
 
@@ -57,6 +63,8 @@ obman_render/
     hands_only/
 
 ```
+
+
 
 
 # Launch
@@ -112,6 +120,19 @@ Note that the model trained on First Hand Action Benchmark strongly overfits to 
 - the mdoel is trained on grasping hands only, and therefore struggles with hand poses that are associated with object-handling
   - In addition to the models, we also provide a hand-only model trained on various hand datasets, including our ObMan dataset, that captures a wider variety of hand poses
   - to try it, launch `python webcam_demo.py --resume release_models/hands_only/checkpoint.pth.tar`
+
+# Citations
+
+If you find this code useful for your research, consider citing:
+
+```
+@INPROCEEDINGS{hasson19_obman,
+  title     = {Learning joint reconstruction of hands and manipulated objects},
+  author    = {Hasson, Yana and Varol, G{\"u}l and Tzionas, Dimitris and Kalevatykh, Igor and Black, Michael J. and Laptev, Ivan and Schmid, Cordelia},
+  booktitle = {CVPR},
+  year      = {2019}
+}
+```
 
 # Acknowledgements
 
