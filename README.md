@@ -27,7 +27,8 @@ obman_train/
 
 ## Download model files
 
-# TODO
+- Download model files from TODO
+- unzip `unzip release_models.zip`
 
 
 ## Install the MANO PyTorch layer
@@ -40,6 +41,8 @@ obman_train/
 - Create an account by clicking *Sign Up* and provide your information
 - Download Models and Code (the downloaded file should have the format mano_v*_*.zip). Note that all code and data from this download falls under the [MANO license](http://mano.is.tue.mpg.de/license).
 - unzip and copy the content of the *models* folder into the misc/mano folder
+
+
 - Your structure should look like this:
 
 ```
@@ -48,6 +51,11 @@ obman_render/
     mano/
       MANO_LEFT.pkl
       MANO_RIGHT.pkl
+  release_models/
+    fhb/
+    obman/
+    hands_only/
+
 ```
 
 
