@@ -71,13 +71,20 @@ Note that the video demo has some lag time, which comes from the visualization b
 
 `python image_demo.py --resume release_models/obman/checkpoint.pth.tar`
 
+In this demo, both the original and flipped inputs are fed, and the outputs are therefore presented for the input treated as a right and a left hand side by side.
+
 Running the demo should produce the following outputs.
 
-![can_in](readme_assets/images/can_in.png)
+<img src="readme_assets/images/can_in.png" width="20%">
+<img src="readme_assets/images/can_output.png" width="40%">
 
-![can_out](readme_assets/images/can_output.png)
+You can also run this demo on data from the [First Hand Action Benchmark](https://github.com/guiggh/hand_pose_action)
 
-In this demo, both the original and flipped inputs are fed, and the outputs are therefore presented for the input treated as a right and a left hand side by side.
+`python image_demo.py --image_path readme_assets/images/fhb_liquid_soap.jpeg --resume release_models/fhb/checkpoint.pth.tar`
+
+<img src="readme_assets/images/fhb_liq_soap_in.png" width="20%">
+<img src="readme_assets/images/fhb_liq_soap_out.png" width="40%">
+
 
 ### Limitations
 
@@ -104,3 +111,8 @@ Code for computing hand evaluation metrics was reused from [hand3d](https://gith
 ## Laplacian regularization loss
 
 [Code](https://github.com/akanazawa/cmr) for the laplacian regularization and precious advice was provided by [Angjoo Kanazawa](https://people.eecs.berkeley.edu/~kanazawa/) !
+
+
+## First Hand Action Benchmark dataset
+
+Helpful advice to work with the dataset was provided by [Guillermo Garcia-Hernando](https://guiggh.github.io/) !
