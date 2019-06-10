@@ -25,6 +25,11 @@ obman_train/
 - Follow the [official instructions](https://github.com/guiggh/hand_pose_action) to download the dataset
 
 
+## Download model files
+
+# TODO
+
+
 ## Install the MANO PyTorch layer
 
 - Follow the instructions from [here](https://github.com/hassony2/manopth)
@@ -63,7 +68,7 @@ You can test it on a recorded video or live using a webcam by launching :
 
 `python webcam_demo.py --resume release_models/obman/checkpoint.pth.tar  --hand_side left`
 
-Hand side detection is not handled in this pipeline, therefore, you should explicitely indicate whether you want to use the right or left hand with `--hand_side`.
+Hand side detection is not handled in this pipeline, therefore, you should explicitly indicate whether you want to use the right or left hand with `--hand_side`.
 
 Note that the video demo has some lag time, which comes from the visualization bottleneck (matplotlib image rendering is quite slow).
 
@@ -85,6 +90,8 @@ You can also run this demo on data from the [First Hand Action Benchmark](https:
 <img src="readme_assets/images/fhb_liq_soap_in.png" width="20%">
 <img src="readme_assets/images/fhb_liq_soap_out.png" width="40%">
 
+Note that the model trained on First Hand Action Benchmark strongly overfits to this dataset, and therefore performs poorly on 'in the wild' images.
+
 
 ### Limitations
 
@@ -94,7 +101,9 @@ You can also run this demo on data from the [First Hand Action Benchmark](https:
 ![mug](readme_assets/images/mug.png)
 
 - the model is trained only on hands holding objects, and therefore doesn't perform well on hands in the absence of objects for poses that do not resemble common grasp poses.
-
+- the mdoel is trained on grasping hands only, and therefore struggles with hand poses that are associated with object-handling
+  - In addition to the models, we also provide a hand-only model trained on various hand datasets, including our ObMan dataset, that captures a wider variety of hand poses
+  - to try it, launch `python webcam_demo.py --resume release_models/hands_only/checkpoint.pth.tar`
 
 # Acknowledgements
 
