@@ -7,9 +7,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 from PIL import Image
 
-import argutils
 from handobjectdatasets.queries import TransQueries, BaseQueries
 
+from mano_train.exputils import argutils
 from mano_train.netscripts.reload import reload_model
 from mano_train.visualize import displaymano
 from mano_train.demo.preprocess import prepare_input, preprocess_frame
