@@ -7,7 +7,7 @@
 
 ## Download the ObMan dataset
 
-- Download the dataset following [these instructions](https://github.com/hassony2/obman)
+- Request the dataset on the [dataset page](https://www.di.ens.fr/willow/research/obman/data/)
 - Create a [symlink](https://www.cyberciti.biz/faq/creating-soft-link-or-symbolic-link/) `ln -s path/to/downloaded/obman datasymlinks/obman`
 - Download  ShapeNetCore v2 object meshes from the [ShapeNet official website](https://www.shapenet.org/)
 - Create a symlink `ln -s /sequoia/data2/dataset/shapenet/ShapeNetCore.v2 datasymlinks/ShapeNetCore.v2`
@@ -27,7 +27,7 @@ obman_train/
 
 ## Download model files
 
-- Download model files from TODO
+- Download model files from [here](http://www.di.ens.fr/willow/research/obman/release_models.zip) `wget http://www.di.ens.fr/willow/research/obman/release_models.zip`
 - unzip `unzip release_models.zip`
 
 ## Install python dependencies
