@@ -73,10 +73,6 @@ obman_train/
 
 # Launch
 
-## Training
-
-`python traineval.py --atlas_predict_trans --atlas_predict_scale --atlas_mesh --mano_use_shape --mano_use_pca --freeze_batchnorm --atlas_separate_encoder`
-
 ## Demo
 
 
@@ -125,6 +121,10 @@ Note that the video demo has some lag time, which comes from the visualization b
 - the mdoel is trained on grasping hands only, and therefore struggles with hand poses that are associated with object-handling
   - In addition to the models, we also provide a hand-only model trained on various hand datasets, including our ObMan dataset, that captures a wider variety of hand poses
   - to try it, launch `python webcam_demo.py --resume release_models/hands_only/checkpoint.pth.tar`
+
+## Training
+
+`python traineval.py --atlas_predict_trans --atlas_predict_scale --atlas_mesh --mano_use_shape --mano_use_pca --freeze_batchnorm --atlas_separate_encoder`
 
 # Citations
 
