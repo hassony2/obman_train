@@ -1,3 +1,7 @@
+# Learning joint reconstruction of hands and manipulated objects
+
+Yana Hasson, Gül Varol, Dimitris Tzionas, Igor Kalevatykh, Michael J. Black,  Ivan Laptev, Cordelia Schmid, CVPR 2019
+
 # Get the code
 
 `git clone https://github.com/hassony2/obman_train`
