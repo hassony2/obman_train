@@ -52,7 +52,7 @@ obman_train/
 - Your structure should look like this:
 
 ```
-obman_render/
+obman_train/
   misc/
     mano/
       MANO_LEFT.pkl
@@ -78,16 +78,6 @@ obman_render/
 
 We provide a model trained on the synthetic ObMan dataset
 
-### Video demo
-
-You can test it on a recorded video or live using a webcam by launching :
-
-`python webcam_demo.py --resume release_models/obman/checkpoint.pth.tar  --hand_side left`
-
-Hand side detection is not handled in this pipeline, therefore, you should explicitly indicate whether you want to use the right or left hand with `--hand_side`.
-
-Note that the video demo has some lag time, which comes from the visualization bottleneck (matplotlib image rendering is quite slow).
-
 ### Single image demo
 
 `python image_demo.py --resume release_models/obman/checkpoint.pth.tar`
@@ -108,6 +98,17 @@ You can also run this demo on data from the [First Hand Action Benchmark](https:
 
 Note that the model trained on First Hand Action Benchmark strongly overfits to this dataset, and therefore performs poorly on 'in the wild' images.
 
+
+
+### Video demo
+
+You can test it on a recorded video or live using a webcam by launching :
+
+`python webcam_demo.py --resume release_models/obman/checkpoint.pth.tar  --hand_side left`
+
+Hand side detection is not handled in this pipeline, therefore, you should explicitly indicate whether you want to use the right or left hand with `--hand_side`.
+
+Note that the video demo has some lag time, which comes from the visualization bottleneck (matplotlib image rendering is quite slow).
 
 ### Limitations
 
