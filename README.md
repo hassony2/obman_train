@@ -1,4 +1,4 @@
-# Learning joint reconstruction of hands and manipulated objects
+# Learning Joint Reconstruction of Hands and Manipulated Objects - Demo, Training Code and Models
 
 Yana Hasson, Gül Varol, Dimitris Tzionas, Igor Kalevatykh, Michael J. Black,  Ivan Laptev, Cordelia Schmid, CVPR 2019
 
