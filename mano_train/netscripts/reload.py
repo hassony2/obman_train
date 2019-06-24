@@ -49,6 +49,8 @@ def reload_model(
         checkpoint_opts["atlas_residual"] = False
     if "mano_lambda_joints3d" not in checkpoint_opts:
         checkpoint_opts["mano_lambda_joints3d"] = False
+    if "mano_lambda_joints2d" not in checkpoint_opts:
+        checkpoint_opts["mano_lambda_joints2d"] = False
     if "mano_adapt_skeleton" not in checkpoint_opts:
         checkpoint_opts["mano_adapt_skeleton"] = False
     if "contact_lambda" not in checkpoint_opts:
@@ -94,6 +96,7 @@ def reload_model(
         mano_use_pca=checkpoint_opts["mano_use_pca"],
         mano_lambda_verts=checkpoint_opts["mano_lambda_verts"],
         mano_lambda_joints3d=checkpoint_opts["mano_lambda_joints3d"],
+        mano_lambda_joints2d=checkpoint_opts["mano_lambda_joints2d"],
     )
     model = torch.nn.DataParallel(model)
     model.eval()

@@ -119,9 +119,10 @@ class HandNet(nn.Module):
             self.atlas_base_net = deepcopy(base_net)
 
         self.absolute_lambda = absolute_lambda
-        if self.absolute_lambda or mano_lambda_joints2d:
-            self.absolute_branch = AbsoluteBranch(
-                base_neurons=[img_feature_size + 3, int(img_feature_size / 2)]
+        if mano_lambda_joints2d:
+            self.scaletrans_branch = AbsoluteBranch(
+                base_neurons=[img_feature_size, int(img_feature_size / 2)],
+                out_dim=3,
             )
 
         self.mano_adapt_skeleton = mano_adapt_skeleton
@@ -285,17 +286,19 @@ class HandNet(nn.Module):
 
             for key, result in mano_results.items():
                 results[key] = result
-            if self.lambda_joints2d and predict_center:
-                non_hom = torch.bmm(
-                    sample[TransQueries.camintrs],
-                    (
-                        mano_results["joints"]
-                        + results["center3d"].unsqueeze(1)
-                    ).permute(0, 2, 1),
-                )
-                proj_joints2d = (non_hom / non_hom[:, 2].unsqueeze(1))[
-                    :, :2, :
-                ].permute(0, 2, 1)
+
+            if self.lambda_joints2d:
+                scaletrans = self.scaletrans_branch(features)
+                trans = scaletrans[:, 1:]
+                # Abs to make sure no inversion in scale
+                scale = torch.abs(scaletrans[:, :1])
+
+                # Trans is multiplied by 100 to make scale and trans updates
+                # of same magnitude after 2d joints supervision
+                # (100 is ~ the scale of the 2D joint coordinate values)
+                proj_joints2d = mano_results["joints"][
+                    :, :, :2
+                ] * scale.unsqueeze(1) + 100 * trans.unsqueeze(1)
                 results["joints2d"] = proj_joints2d
                 if not no_loss:
                     gt_joints2d = sample[TransQueries.joints2d].cuda().float()
