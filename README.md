@@ -4,6 +4,7 @@ Yana Hasson, Gül Varol, Dimitris Tzionas, Igor Kalevatykh, Michael J. Black,  I
 
 - [Project page](https://hassony2.github.io/obman)
 - [Dataset repository](https://github.com/hassony2/obman)
+- [Robotic grasps generation using MANO](https://github.com/ikalevatykh/mano_grasp)
 - [Dataset generation](https://github.com/hassony2/obman_render)
 
 # Get the code
