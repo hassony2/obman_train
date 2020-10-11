@@ -98,6 +98,8 @@ def main(args):
         print("Froze atlas encoder")
     if args.atlas_freeze_decoder and hasattr(model, "atlas_branch"):
         netutils.rec_freeze(model.atlas_branch.decoder)
+        if args.atlas_predict_trans: netutils.rec_freeze(model.atlas_branch.decode_trans)
+        if args.atlas_predict_scale: netutils.rec_freeze(model.atlas_branch.decode_scale)
         print("Froze atlas decoder")
 
     # Optimize unfrozen parts of the network
