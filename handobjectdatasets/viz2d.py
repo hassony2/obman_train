@@ -106,8 +106,8 @@ def _draw2dseg_cv2(
 ):
     cv2.line(
         img,
-        (annot[idx1, 0], annot[idx1, 1]),
-        (annot[idx2, 0], annot[idx2, 1]),
+        (int(annot[idx1, 0]), int(annot[idx1, 1])),
+        (int(annot[idx2, 0]), int(annot[idx2, 1])),
         col,
         linewidth,
     )
