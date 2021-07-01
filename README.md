@@ -1,4 +1,6 @@
-# Learning Joint Reconstruction of Hands and Manipulated Objects - Demo, Training Code and Models
+# Monocular RGB Hand-Object Detection and 3D Hand Reconstruction - Demo
+
+## Learning Joint Reconstruction of Hands and Manipulated Objects
 
 Yana Hasson, Gül Varol, Dimitris Tzionas, Igor Kalevatykh, Michael J. Black,  Ivan Laptev, Cordelia Schmid, CVPR 2019
 
@@ -7,9 +9,15 @@ Yana Hasson, Gül Varol, Dimitris Tzionas, Igor Kalevatykh, Michael J. Black,  I
 - [Robotic grasps generation using MANO](https://github.com/ikalevatykh/mano_grasp)
 - [Dataset generation](https://github.com/hassony2/obman_render)
 
+## Understanding Human Hands in Contact at Internet Scale
+
+Dandan Shan, Jiaqi Geng*, Michelle Shu*, David F. Fouhey, CVPR 2020, Oral
+
+ - [Project and dataset webpage](http://fouheylab.eecs.umich.edu/~dandans/projects/100DOH/)
+
 # Get the code
 
-`git clone https://github.com/hassony2/obman_train`
+`git clone https://github.com/neilsong/obman_train`
 `cd obman_train`
 
 # Download and prepare datasets
@@ -142,6 +150,15 @@ If you find this code useful for your research, consider citing:
   author    = {Hasson, Yana and Varol, G{\"u}l and Tzionas, Dimitris and Kalevatykh, Igor and Black, Michael J. and Laptev, Ivan and Schmid, Cordelia},
   booktitle = {CVPR},
   year      = {2019}
+}
+```
+
+```
+@INPROCEEDINGS{Shan20, 
+    author = {Shan, Dandan and Geng, Jiaqi and Shu, Michelle  and Fouhey, David},
+    title = {Understanding Human Hands in Contact at Internet Scale},
+    booktitle = CVPR, 
+    year = {2020} 
 }
 ```
 
